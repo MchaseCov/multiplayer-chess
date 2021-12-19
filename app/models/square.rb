@@ -22,7 +22,7 @@ class Square < ApplicationRecord
 
   # Associations
   #===Pieces
-  has_one :piece
+  has_one :piece, dependent: :destroy
   #===Games
   belongs_to :game, validate: true
   # Methods
