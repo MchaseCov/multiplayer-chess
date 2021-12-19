@@ -4,7 +4,7 @@ class GamesController < ApplicationController
   end
 
   def show
-    @game = Game.where(id: params[:id]).includes({ squares: :piece }, :pieces).first
+    @game = Game.find(params[:id])
   end
 
   def create

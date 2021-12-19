@@ -20,7 +20,7 @@ class Game < ApplicationRecord
 
   # Associations
   #===Squares
-  has_many :squares, dependent: :destroy
+  has_many :squares, -> { includes(:piece) }, dependent: :destroy
   #===Pieces
   has_many :pieces, through: :squares, source: :piece
   has_many :white_pieces, -> { merge(Piece.white_team) },
