@@ -1,6 +1,6 @@
 # == Table Schema ==
 #
-# table name: scrollers
+# table name: games
 #
 # id                      :bigint       null: false, primary key
 # white_player_id         :index        null:false, foreign key of 1 user
@@ -13,6 +13,9 @@ class Game < ApplicationRecord
   # Scopes
   # Validations
   # Associations
+  validates_length_of :squares, maximum: 64
+  #===Squares
+  has_many :squares
   #===Users
   belongs_to :white_player, class_name: :User,
                             foreign_key: :white_player_id,

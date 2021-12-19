@@ -1,6 +1,6 @@
 # == Table Schema ==
 #
-# table name: scrollers
+# table name: users
 #
 # id                      :bigint       null: false, primary key
 # username                :string
@@ -19,6 +19,7 @@ class User < ApplicationRecord
   validates_presence_of :username
   validates_uniqueness_of :username
   # Associations
+  #===Games
   has_many :white_games, class_name: :Game,
                          foreign_key: :white_player_id,
                          inverse_of: :white_player,
