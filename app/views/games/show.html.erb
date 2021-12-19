@@ -1,0 +1,13 @@
+<%=@game.white_player.username%>
+<%=@game.color_player ? @game.color_player.username : "No second player yet" %>
+<div class="grid grid-cols-8 w-max gap-2 chess-board">
+  <%@game.squares.order(row: :desc).order(column: :asc).each do |square|%>
+    <div class="border-2 w-32 h-32 text-center chess-square">
+      <%="(#{square.row},#{square.column})"%> <br>
+      <% if square.piece %>
+        <%=square.piece.type%>
+        <%=square.piece.color? ? "black" : "white" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

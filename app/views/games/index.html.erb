@@ -1,1 +1,5 @@
 list of all games:
+<%@games.each do |g|%>
+  <%= link_to "#{g.white_player.username}'s game", g %>
+<% end %>
+<%= button_to "new game", games_path %>
