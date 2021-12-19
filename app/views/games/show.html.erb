@@ -5,8 +5,7 @@
     <div class="border-2 w-32 h-32 text-center chess-square">
       <%="(#{square.row},#{square.column})"%> <br>
       <% if square.piece %>
-        <%=square.piece.type%>
-        <%=square.piece.color? ? "black" : "white" %>
+        <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
       <% end %>
     </div>
   <% end %>

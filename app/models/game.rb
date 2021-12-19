@@ -12,7 +12,10 @@ class Game < ApplicationRecord
   # Callbacks
   after_create_commit do
     create_game_squares
-    create_pawns
+    create_pawns(false, 2)
+    create_pawns(true, 7)
+    create_back_row(false, 1)
+    create_back_row(true, 8)
   end
   # Scopes
   # Validations
@@ -48,12 +51,18 @@ class Game < ApplicationRecord
     end
   end
 
-  def create_pawns # STI cannot create through the square directly
-    squares.where(row: 2).each do |square|
-      Pawn.create(color: false, game: square.game, square: square)
+  def create_pawns(color, row) # STI cannot create through the square directly
+    squares.where(row: row).each do |square|
+      Pawn.create(color: color, game: square.game, square: square)
     end
-    squares.where(row: 7).each do |square|
-      Pawn.create(color: true, game: square.game, square: square)
-    end
+  end
+
+  def create_back_row(color, row)
+    row = squares.where(row: row)
+    row.where(column: [1, 8]).each { |s| Rook.create(color: color, game: s.game, square: s) }
+    row.where(column: [2, 7]).each { |s| Knight.create(color: color, game: s.game, square: s) }
+    row.where(column: [3, 6]).each { |s| Bishop.create(color: color, game: s.game, square: s) }
+    row.where(column: 4).each      { |s| Queen.create(color: color, game: s.game, square: s) }
+    row.where(column: 5).each      { |s| King.create(color: color, game: s.game, square: s) }
   end
 end
