@@ -19,6 +19,14 @@ class User < ApplicationRecord
   validates_presence_of :username
   validates_uniqueness_of :username
   # Associations
+  has_many :white_games, class_name: :Game,
+                         foreign_key: :white_player_id,
+                         inverse_of: :white_player,
+                         dependent: :destroy
+  has_many :color_games, class_name: :Game,
+                         foreign_key: :color_player_id,
+                         inverse_of: :color_player,
+                         dependent: :destroy
   # Methods
   def email_required?
     false

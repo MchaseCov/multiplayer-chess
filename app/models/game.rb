@@ -1,4 +1,24 @@
+# == Table Schema ==
+#
+# table name: scrollers
+#
+# id                      :bigint       null: false, primary key
+# white_player_id         :index        null:false, foreign key of 1 user
+# color_player_id         :index                    foreign key of 1 user
+# created_at              :datetime     null: false
+# updated_at              :datetime     null: false
+#
 class Game < ApplicationRecord
-  belongs_to :white_player
-  belongs_to :color_player
+  # Callbacks
+  # Scopes
+  # Validations
+  # Associations
+  #===Users
+  belongs_to :white_player, class_name: :User,
+                            foreign_key: :white_player_id,
+                            inverse_of: :white_games
+  belongs_to :color_player, class_name: :User,
+                            foreign_key: :color_player_id,
+                            inverse_of: :color_games
+  # Methods
 end

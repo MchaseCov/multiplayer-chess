@@ -1,9 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  white_player: one
-  color_player: one
+  white_player: first_user
+  color_player: second_user
 
 two:
-  white_player: two
-  color_player: two
+  white_player: second_user
+  color_player: first_user
+
+no_players:
+  white_player: first_user
+  color_player:
