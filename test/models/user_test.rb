@@ -1,7 +1,8 @@
-require "test_helper"
+require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+  include TestModelValidations
+  # test_validates_presence_of
+  # test_validates_uniqueness_of
+  #
 end
