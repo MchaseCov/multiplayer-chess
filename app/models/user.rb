@@ -28,6 +28,10 @@ class User < ApplicationRecord
                          foreign_key: :color_player_id,
                          inverse_of: :color_player,
                          dependent: :destroy
+  has_many :white_pieces, through: :white_games,
+                          source: :white_pieces
+  has_many :color_pieces, through: :color_games,
+                          source: :color_pieces
   # Methods
   def email_required?
     false

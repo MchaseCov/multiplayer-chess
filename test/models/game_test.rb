@@ -13,4 +13,13 @@ class GameTest < ActiveSupport::TestCase
   test 'Games do not need a color piece player to be created' do
     assert_not games(:no_players).color_player
   end
+  test 'Games have pieces' do
+    assert games(:one).pieces
+  end
+  test 'Games have white pieces' do
+    assert games(:one).white_pieces
+  end
+  test 'Games have color pieces' do
+    assert games(:one).color_pieces
+  end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_19_183123) do
+ActiveRecord::Schema.define(version: 2021_12_19_184733) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,19 @@ ActiveRecord::Schema.define(version: 2021_12_19_183123) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["color_player_id"], name: "index_games_on_color_player_id"
     t.index ["white_player_id"], name: "index_games_on_white_player_id"
+  end
+
+  create_table "pieces", force: :cascade do |t|
+    t.string "type"
+    t.boolean "color"
+    t.boolean "taken", default: false
+    t.boolean "has_moved", default: false
+    t.bigint "game_id", null: false
+    t.bigint "square_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["game_id"], name: "index_pieces_on_game_id"
+    t.index ["square_id"], name: "index_pieces_on_square_id"
   end
 
   create_table "squares", force: :cascade do |t|
@@ -47,5 +60,7 @@ ActiveRecord::Schema.define(version: 2021_12_19_183123) do
 
   add_foreign_key "games", "users", column: "color_player_id"
   add_foreign_key "games", "users", column: "white_player_id"
+  add_foreign_key "pieces", "games"
+  add_foreign_key "pieces", "squares"
   add_foreign_key "squares", "games"
 end

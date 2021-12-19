@@ -12,8 +12,15 @@ class Game < ApplicationRecord
   # Callbacks
   # Scopes
   # Validations
-  # Associations
   validates_length_of :squares, maximum: 64
+
+  # Associations
+  #===Pieces
+  has_many :pieces
+  has_many :white_pieces, -> { merge(Piece.white_team) },
+           through: :pieces, source: :game
+  has_many :color_pieces, -> { merge(Piece.color_team) },
+           through: :pieces, source: :game
   #===Squares
   has_many :squares
   #===Users
