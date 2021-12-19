@@ -6,4 +6,5 @@ Rails.application.routes.draw do
   root 'games#index'
 
   resources :games
+  resources :pieces, only: %i[edit update]
 end

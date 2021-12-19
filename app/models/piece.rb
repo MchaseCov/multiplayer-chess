@@ -7,7 +7,7 @@
 # taken                   :boolean      default: false
 # has_moved               :boolean      default: false
 # game_id                 :index        null:false, foreign key of game
-# game_id                 :index        null:false, foreign key of square
+# square_id               :index                    foreign key of square
 # created_at              :datetime     null: false
 # updated_at              :datetime     null: false
 #
@@ -23,7 +23,7 @@ class Piece < ApplicationRecord
   #===Games
   belongs_to :game
   #===Squares
-  belongs_to :square
+  belongs_to :square, optional: true
 
   # Methods
 end

@@ -25,11 +25,10 @@ class Game < ApplicationRecord
   #===Squares
   has_many :squares, -> { includes(:piece) }, dependent: :destroy
   #===Pieces
-  has_many :pieces, through: :squares, source: :piece
-  has_many :white_pieces, -> { merge(Piece.white_team) },
-           through: :pieces, source: :game
-  has_many :color_pieces, -> { merge(Piece.color_team) },
-           through: :pieces, source: :game
+  has_many :pieces, dependent: :destroy
+  has_many :white_pieces, -> { merge(Piece.white_team) }, class_name: :Piece, foreign_key: :game_id
+  has_many :color_pieces, -> { merge(Piece.color_team) }, class_name: :Piece, foreign_key: :game_id
+  has_many :taken_pieces, -> { merge(Piece.taken_pieces) }, class_name: :Piece, foreign_key: :game_id
 
   #===Users
   belongs_to :white_player, class_name: :User,

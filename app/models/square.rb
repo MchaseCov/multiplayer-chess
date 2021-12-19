@@ -22,8 +22,15 @@ class Square < ApplicationRecord
 
   # Associations
   #===Pieces
-  has_one :piece, dependent: :destroy
+  has_one :piece
   #===Games
   belongs_to :game, validate: true
   # Methods
+  def coordinate
+    "(#{row},#{column})"
+  end
+
+  def self.board_order
+    order(row: :desc).order(column: :asc)
+  end
 end

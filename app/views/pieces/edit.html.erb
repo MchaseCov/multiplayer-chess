@@ -1,0 +1,6 @@
+u are editing <%=@piece.type%> located at (<%=@piece.square.row%>, <%=@piece.square.column%>)
+move to: 
+<%= form_with model: @piece, url: piece_path(@piece) do |f| %>
+  <%=select_tag :square, options_from_collection_for_select(@squares, 'id', "coordinate")%>
+  <%= f.submit %>
+<% end %>

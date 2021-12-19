@@ -1,12 +1,18 @@
 <%=@game.white_player.username%>
 <%=@game.color_player ? @game.color_player.username : "No second player yet" %>
 <div class="grid grid-cols-8 w-max gap-2 chess-board">
-  <%@game.squares.order(row: :desc).order(column: :asc).each do |square|%>
+  <%@game.squares.board_order.each do |square|%>
     <div class="border-2 w-32 h-32 text-center chess-square">
       <%="(#{square.row},#{square.column})"%> <br>
       <% if square.piece %>
-        <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
+        <%= link_to edit_piece_path(square.piece) do %>
+          <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
+        <% end %>
       <% end %>
     </div>
+  <% end %>
+  Taken pieces:
+  <%@game.taken_pieces.each do |p|%>
+    <i class="fas fa-chess-<%=p.type.downcase%> text-4xl <%=p.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
   <% end %>
 </div>
