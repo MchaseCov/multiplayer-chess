@@ -10,4 +10,8 @@ class PieceTest < ActiveSupport::TestCase
   test 'pieces belong to a game' do
     assert pieces(:one).game
   end
+
+  test 'pawns are a valid piece' do
+    assert Pawn.new
+  end
 end
