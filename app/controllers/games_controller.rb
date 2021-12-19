@@ -8,6 +8,7 @@ class GamesController < ApplicationController
   end
 
   def create
-    current_user.white_games.create
+    @game = current_user.white_games.create
+    redirect_to @game
   end
 end
