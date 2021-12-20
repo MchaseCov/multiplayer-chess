@@ -4,15 +4,13 @@ class Pawn < Piece
   end
 
   def possible_forward_moves
-    if color
-      forward_range = [current_row - 1]
-      forward_range << current_row - 2 if has_moved == false
-    else
-      forward_range = [current_row + 1]
-      forward_range << current_row + 2 if has_moved == false
-    end
-    game_squares.where(piece: { id: nil })
-                .where(row: forward_range, column: current_col)
+    first_move = game_squares.where(row: (color ? current_row - 1 : current_row + 1), column: current_col)
+                             .where(piece: { id: nil })
+
+    return first_move if first_move.empty? || has_moved == true
+
+    first_move.or(game_squares.where(row: (color ? current_row - 2 : current_row + 2), column: current_col)
+                              .where(piece: { id: nil }))
   end
 
   # self note:
