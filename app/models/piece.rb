@@ -15,9 +15,10 @@
 class Piece < ApplicationRecord
   # Callbacks
   # Scopes
-  scope :white_team, -> { where('color = :boolean', boolean: false) }
-  scope :color_team, -> { where('color = :boolean', boolean: true) }
+  scope :white_team, -> { where('color = :boolean', boolean: false).includes(:game) }
+  scope :color_team, -> { where('color = :boolean', boolean: true).includes(:game) }
   scope :taken_pieces, -> { where('taken = :boolean', boolean: true) }
+  scope :untaken_pieces, -> { where('taken = :boolean', boolean: false) }
 
   # Validations
   # Associations
@@ -50,63 +51,19 @@ class Piece < ApplicationRecord
 
   #===Moveset Methods
 
-  #======Straights
-  #=========All Direcitons
-  def valid_straight_moves(amount = 8)
-    (valid_right(amount) + valid_left(amount) + valid_up(amount) + valid_down(amount))
-  end
-
-  #=========Left to Right
-  def valid_right(amount = (8 - current_col))
-    validate_square(amount, 0, 1)
-  end
-
-  #=========Right to Left
-  def valid_left(amount = (current_col - 1))
-    validate_square(amount, 0, -1)
-  end
-
-  #=========Down to Up
-  def valid_up(amount = (8 - current_row))
-    validate_square(amount, 1, 0)
-  end
-
-  #=========Up to Down
-  def valid_down(amount = (current_row - 1))
-    validate_square(amount, -1, 0)
-  end
-
-  #======Diagonals
-  #=========All Directions
-  def valid_diagonal_moves(amount = 8)
-    (valid_up_right(amount) + valid_down_right(amount) + valid_up_left(amount) + valid_down_left(amount))
-  end
-
-  #=========To Up & Right
-  def valid_up_right(amount = (8 - current_col))
-    validate_square(amount, 1, 1)
-  end
-
-  #=========To Up & Left
-  def valid_up_left(amount = (current_col - 1))
-    validate_square(amount, 1, -1)
-  end
-
-  #=========To Down & Right
-  def valid_down_right(amount = (8 - current_col))
-    validate_square(amount, -1, 1)
-  end
-
-  #=========To Down & Left
-  def valid_down_left(amount = (current_col - 1))
-    validate_square(amount, -1, -1)
-  end
-
   #======Validation
-  def validate_square(column_count, row_direction, col_direction)
+  def collect_valid_moves
+    validated_moves = []
+    moveset.each do |row_movement, col_movement, amount_to_check|
+      validated_moves += validate_square(row_movement, col_movement, amount_to_check)
+    end
+    validated_moves
+  end
+
+  def validate_square(row_direction, col_direction, amount_to_check)
     valid = []
     row_count = col_count = 0
-    column_count.times do
+    amount_to_check.times do
       row_count += row_direction
       col_count += col_direction
       square = game_squares.find_by(row: (current_row + row_count), column: (current_col + col_count))
@@ -120,5 +77,14 @@ class Piece < ApplicationRecord
       end
     end
     valid
+  end
+
+  def dangerous_positions
+    danger = []
+    opposition = color ? game.white_pieces : game.color_pieces
+    opposition.untaken_pieces.includes(:square).where.not(type: 'King').each do |piece|
+      danger << piece.valid_moves
+    end
+    danger
   end
 end
