@@ -85,6 +85,6 @@ class Piece < ApplicationRecord
     opposition.untaken_pieces.includes(:square).where.not(type: 'King').each do |piece|
       danger << piece.valid_moves
     end
-    danger
+    danger.flatten
   end
 end
