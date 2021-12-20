@@ -21,9 +21,9 @@ class Piece < ApplicationRecord
   # Validations
   # Associations
   #===Games
-  belongs_to :game
+  belongs_to :game, touch: true
   #===Squares
-  belongs_to :square, optional: true
+  belongs_to :square, optional: true, inverse_of: :piece
 
   # Methods
 end

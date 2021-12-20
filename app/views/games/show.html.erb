@@ -2,8 +2,8 @@
 <%=@game.color_player ? @game.color_player.username : "No second player yet" %>
 <div class="grid grid-cols-8 w-max gap-2 chess-board">
   <%@game.squares.board_order.each do |square|%>
-    <div class="border-2 w-32 h-32 text-center chess-square">
-      <%="(#{square.row},#{square.column})"%> <br>
+    <div class="border-2 w-32 h-32 text-center chess-square" id="<%=square.coordinate%>">
+      <%=square.coordinate%> <br>
       <% if square.piece %>
         <%= link_to edit_piece_path(square.piece) do %>
           <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>

@@ -22,9 +22,10 @@ class Square < ApplicationRecord
 
   # Associations
   #===Pieces
-  has_one :piece
+  has_one :piece, inverse_of: :square
   #===Games
-  belongs_to :game, validate: true
+  belongs_to :game, validate: true,
+                    touch: true
   # Methods
   def coordinate
     "(#{row},#{column})"
