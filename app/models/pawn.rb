@@ -1,25 +1,25 @@
 class Pawn < Piece
-  # This likely goes back into Piece for all piece types to use this same format BUT it stays here until I actually need to do that and know its the way to go.
   def valid_moves
-    possible_forward_moves.or(possible_attack_moves)
+    possible_forward_moves + possible_attack_moves
   end
 
   def possible_forward_moves
-    first_move = game_squares.where(row: (color ? current_row - 1 : current_row + 1), column: current_col)
-                             .where(piece: { id: nil })
-
-    return first_move if first_move.empty? || has_moved == true
-
-    first_move.or(game_squares.where(row: (color ? current_row - 2 : current_row + 2), column: current_col)
-                              .where(piece: { id: nil }))
+    @no_enemy = true
+    @only_enemy = false
+    if color == true
+      valid_down(has_moved ? 1 : 2)
+    else
+      valid_up(has_moved ? 1 : 2)
+    end
   end
 
-  # self note:
-  # Can use this later for King logic by having a method such as Game.last.pieces.where(type: "Pawn", taken: false).each do |p| p.possible_attack_moves end (but like .white_pieces or something instead of where type is pawn)
   def possible_attack_moves
-    row_direction = color ? current_row - 1 : current_row + 1
-    game_squares.where.not(piece: { id: nil })
-                .where(row: row_direction, column: [current_col + 1, current_col - 1])
-                .where(piece: { color: enemy })
+    @no_enemy = false
+    @only_enemy = true
+    if color == true
+      valid_down_right(1) + valid_down_left(1)
+    else
+      valid_up_right(1) + valid_up_left(1)
+    end
   end
 end

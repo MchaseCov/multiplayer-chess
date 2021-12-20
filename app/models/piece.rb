@@ -30,6 +30,8 @@ class Piece < ApplicationRecord
 
   # Methods
   #===Instance Variables
+  private
+
   def enemy
     @enemy = color ? false : true
   end
@@ -47,7 +49,33 @@ class Piece < ApplicationRecord
   end
 
   #===Moveset Methods
+
+  #======Straights
+  #=========All Direcitons
   def valid_straight_moves(amount = 8)
+    (valid_right(amount) + valid_left(amount) + valid_up(amount) + valid_down(amount))
+  end
+
+  #=========Left to Right
+  def valid_right(amount = (8 - current_col))
+    validate_square(amount, 0, 1)
+  end
+
+  #=========Right to Left
+  def valid_left(amount = (current_col - 1))
+    validate_square(amount, 0, -1)
+  end
+
+  #=========Down to Up
+  def valid_up(amount = (8 - current_row))
+    validate_square(amount, 1, 0)
+  end
+
+  #=========Up to Down
+  def valid_down(amount = (current_row - 1))
+    validate_square(amount, -1, 0)
+  end
+
   #======Diagonals
   #=========All Directions
   def valid_diagonal_moves(amount = 8)
