@@ -1,6 +1,7 @@
 class PiecesController < ApplicationController
   before_action :set_edit_variables, only: %i[edit]
-  before_action :set_update_variables, :shared_update_assignments, only: %i[update_pawn update_knight update_rook]
+  before_action :set_update_variables, :shared_update_assignments,
+                only: %i[update_pawn update_knight update_rook update_bishop]
   def edit
     redirect_to @piece.game if @squares.blank?
   end
@@ -14,6 +15,8 @@ class PiecesController < ApplicationController
   def update_knight; end
 
   def update_rook; end
+
+  def update_bishop; end
 
   private
 

@@ -48,35 +48,46 @@ class Piece < ApplicationRecord
 
   #===Moveset Methods
   def valid_straight_moves(amount = 8)
-    (possible_y_moves(amount) + possible_x_moves(amount))
+  #======Diagonals
+  #=========All Directions
+  def valid_diagonal_moves(amount = 8)
+    (valid_up_right(amount) + valid_down_right(amount) + valid_up_left(amount) + valid_down_left(amount))
   end
 
-  def possible_y_moves(amount)
-    current_column_squares = game_squares.where(column: current_col)
-    forward = unobstructed_moves(current_column_squares.where('row > ?', current_row).order(row: :asc).limit((amount)))
-    backward = unobstructed_moves(current_column_squares.where('row < ?',
-                                                               current_row).order(row: :desc).limit((amount)))
-    (forward + backward)
+  #=========To Up & Right
+  def valid_up_right(amount = (8 - current_col))
+    validate_square(amount, 1, 1)
   end
 
-  def possible_x_moves(amount)
-    current_row_squares = game_squares.where(row: current_row)
-    right = unobstructed_moves(current_row_squares.where('squares.column > ?',
-                                                         current_col).order(column: :asc).limit((amount)))
-    left = unobstructed_moves(current_row_squares.where('squares.column < ?',
-                                                        current_col).order(column: :desc).limit((amount)))
-    (right + left)
+  #=========To Up & Left
+  def valid_up_left(amount = (current_col - 1))
+    validate_square(amount, 1, -1)
   end
 
-  def unobstructed_moves(direction)
+  #=========To Down & Right
+  def valid_down_right(amount = (8 - current_col))
+    validate_square(amount, -1, 1)
+  end
+
+  #=========To Down & Left
+  def valid_down_left(amount = (current_col - 1))
+    validate_square(amount, -1, -1)
+  end
+
+  #======Validation
+  def validate_square(column_count, row_direction, col_direction)
     valid = []
-    direction.each do |square|
+    row_count = col_count = 0
+    column_count.times do
+      row_count += row_direction
+      col_count += col_direction
+      square = game_squares.find_by(row: (current_row + row_count), column: (current_col + col_count))
+      break if square.nil? || square.piece&.color == color
+
       if square.piece.nil?
-        valid << square
+        valid << square unless @only_enemy
       elsif square.piece.color == enemy
-        valid << square
-        break
-      elsif square.piece.color == color
+        valid << square unless @no_enemy
         break
       end
     end
