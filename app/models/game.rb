@@ -22,14 +22,22 @@ class Game < ApplicationRecord
   validates_length_of :squares, maximum: 64
 
   # Associations
-  #===Squares
-  has_many :squares, -> { includes(:piece) }, dependent: :destroy
   #===Pieces
   has_many :pieces, dependent: :destroy
-  has_many :white_pieces, -> { merge(Piece.white_team) }, class_name: :Piece, foreign_key: :game_id
-  has_many :color_pieces, -> { merge(Piece.color_team) }, class_name: :Piece, foreign_key: :game_id
-  has_many :taken_pieces, -> { merge(Piece.taken_pieces) }, class_name: :Piece, foreign_key: :game_id
-
+  has_many :white_pieces, -> { merge(Piece.white_team) },
+           class_name: :Piece,
+           foreign_key: :game_id,
+           dependent: :destroy
+  has_many :color_pieces, -> { merge(Piece.color_team) },
+           class_name: :Piece,
+           foreign_key: :game_id,
+           dependent: :destroy
+  has_many :taken_pieces, -> { merge(Piece.taken_pieces) },
+           class_name: :Piece,
+           foreign_key: :game_id,
+           dependent: :destroy
+  #===Squares
+  has_many :squares, -> { includes(:piece) }, dependent: :destroy
   #===Users
   belongs_to :white_player, class_name: :User,
                             foreign_key: :white_player_id,

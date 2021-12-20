@@ -1,6 +1,25 @@
-u are editing <%=@piece.type%> located at (<%=@piece.square.row%>, <%=@piece.square.column%>)
-move to: 
-<%= form_with model: @piece, url: piece_path(@piece) do |f| %>
-  <%=select_tag :square, options_from_collection_for_select(@squares, 'id', "coordinate")%>
-  <%= f.submit %>
+<%= turbo_frame_tag id="chess-board-frame", class:"w-full", target: '_top' do%>
+  <div class="grid grid-cols-8 w-max gap-2 chess-board">
+    <%@game.squares.board_order.each do |square|%>
+      <% if @squares.include?(square) %>
+        <%= button_to piece_update_pawn_path(@piece, square: square.id), class:"block border-2 w-32 h-32 text-center chess-square bg-indigo-400", id:"#{square.coordinate}" do %>
+          <%=square.coordinate%> <br>
+          <% if square.piece %>
+            <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
+          <% end %>
+        <% end %>
+      <% else %>
+        <div class="border-2 w-32 h-32 text-center chess-square" id="<%=square.coordinate%>">
+          <%=square.coordinate%> <br>
+          <% if square.piece == @piece%>
+            <%= link_to @game do %>
+              <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl  text-amber-400 white-piece"></i>
+            <% end %>
+          <% elsif square.piece %>
+            <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
 <% end %>
