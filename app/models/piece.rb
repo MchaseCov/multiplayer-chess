@@ -3,6 +3,7 @@
 # table name: pieces
 #
 # id                      :bigint       null: false, primary key
+# type                    :string       STI
 # color                   :boolean
 # taken                   :boolean      default: false
 # has_moved               :boolean      default: false
@@ -26,4 +27,19 @@ class Piece < ApplicationRecord
   belongs_to :square, optional: true, inverse_of: :piece, touch: true
 
   # Methods
+  def enemy
+    @enemy = color ? false : true
+  end
+
+  def current_row
+    @current_row ||= square.row.to_i
+  end
+
+  def current_col
+    @current_col ||= square.column.to_i
+  end
+
+  def game_squares
+    @game_squares ||= game.squares.includes(:piece)
+  end
 end

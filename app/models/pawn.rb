@@ -1,4 +1,5 @@
 class Pawn < Piece
+  # This likely goes back into Piece for all piece types to use this same format BUT it stays here until I actually need to do that and know its the way to go.
   def valid_moves
     possible_forward_moves.or(possible_attack_moves)
   end
@@ -20,21 +21,5 @@ class Pawn < Piece
     game_squares.where.not(piece: { id: nil })
                 .where(row: row_direction, column: [current_col + 1, current_col - 1])
                 .where(piece: { color: enemy })
-  end
-
-  def enemy
-    @enemy = color ? false : true
-  end
-
-  def current_row
-    @current_row ||= square.row.to_i
-  end
-
-  def current_col
-    @current_col ||= square.column.to_i
-  end
-
-  def game_squares
-    @game_squares ||= game.squares.includes(:piece)
   end
 end
