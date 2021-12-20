@@ -12,5 +12,7 @@ Rails.application.routes.draw do
     post 'knight', to: 'pieces#update_knight', as: 'update_knight'
     post 'rook', to: 'pieces#update_rook', as: 'update_rook'
     post 'bishop', to: 'pieces#update_bishop', as: 'update_bishop'
+    post 'queen', to: 'pieces#update_queen', as: 'update_queen'
+    post 'king', to: 'pieces#update_king', as: 'update_king'
   end
 end
