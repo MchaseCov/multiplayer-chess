@@ -10,6 +10,10 @@
 #
 class Game < ApplicationRecord
   # Callbacks
+  after_update_commit do
+    broadcast_update_later_to self, target: "chess_game_#{id}" unless created_at >= (5.seconds.ago)
+  end
+
   after_create_commit do
     create_game_squares
     create_pawns(false, 2)

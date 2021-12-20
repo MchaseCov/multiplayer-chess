@@ -23,7 +23,7 @@ class Piece < ApplicationRecord
   #===Games
   belongs_to :game, touch: true
   #===Squares
-  belongs_to :square, optional: true, inverse_of: :piece
+  belongs_to :square, optional: true, inverse_of: :piece, touch: true
 
   # Methods
 end

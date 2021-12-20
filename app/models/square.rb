@@ -28,7 +28,14 @@ class Square < ApplicationRecord
                     touch: true
   # Methods
   def coordinate
-    "(#{row},#{column})"
+    "(#{column},#{row})"
+  end
+
+  # Only for use in view, not for comparisons
+  def visual_coordinate
+    h = {}
+    ('A'..'Z').each_with_index { |w, i| h[i + 1] = w }
+    "(#{h[column]}#{row})"
   end
 
   def self.board_order
