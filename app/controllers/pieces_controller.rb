@@ -3,6 +3,7 @@ class PiecesController < ApplicationController
   before_action :set_game_and_piece
   before_action :validate_turn
   #=== Edit
+  before_action :enforce_check, if: -> { @game.check }
   before_action :fetch_valid_moves_for_piece, only: %i[edit]
   #=== Updating
   before_action :set_selected_square,
@@ -72,7 +73,9 @@ class PiecesController < ApplicationController
   end
 
   def validate_turn
-    if @game.turn?
+    redirect_to @game and return if @game.game_over
+
+    if @game.turn
       redirect_to @game unless current_user == @game.color_player && @piece.color
     else
       redirect_to @game unless current_user == @game.white_player && !@piece.color
@@ -80,6 +83,21 @@ class PiecesController < ApplicationController
   end
 
   def update_turn
+    @game.update_attribute(:check, false) if @game.check
+    @piece.valid_moves.each do |move|
+      @game.update_attribute(:check, true) if move.piece&.type == 'King'
+    end
+
     @game.update_attribute(:turn, (@piece.color? ? false : true))
+  end
+
+  def enforce_check
+    redirect_to @game unless @piece.type == 'King'
+    declare_winner unless @piece.valid_moves.present?
+  end
+
+  def declare_winner
+    @game.update_attribute(:game_over, true)
+    @game.update_attribute(:winner, (@game.turn ? @game.white_player : @game.color_player))
   end
 end

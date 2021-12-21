@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_21_020009) do
+ActiveRecord::Schema.define(version: 2021_12_21_043656) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(version: 2021_12_21_020009) do
     t.boolean "game_over", default: false
     t.boolean "turn", default: false
     t.bigint "winner_id"
+    t.boolean "check", default: false
     t.index ["color_player_id"], name: "index_games_on_color_player_id"
     t.index ["white_player_id"], name: "index_games_on_white_player_id"
     t.index ["winner_id"], name: "index_games_on_winner_id"

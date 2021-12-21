@@ -7,6 +7,7 @@
 # color_player_id         :index                     foreign key of 1 user
 # game_over               :boolean                   default: false
 # turn                    :boolean                   default: false
+# check                   :boolean                   default: false
 # winner_id               :index        null: true, foreign key of 1 user
 # created_at              :datetime     null: false
 # updated_at              :datetime     null: false
