@@ -20,6 +20,13 @@ class Piece < ApplicationRecord
   scope :color_team, -> { where('color = :boolean', boolean: true).includes(:game) }
   scope :taken_pieces, -> { where('taken = :boolean', boolean: true) }
   scope :untaken_pieces, -> { where('taken = :boolean', boolean: false) }
+  scope :pawn, -> { where('type = :type', type: 'Pawn') }
+  scope :rook, -> { where('type = :type', type: 'Rook') }
+  scope :bishop, -> { where('type = :type', type: 'Bishop') }
+  scope :knight, -> { where('type = :type', type: 'Knight') }
+  scope :queen, -> { where('type = :type', type: 'Queen') }
+  scope :king, -> { where('type = :type', type: 'King') }
+  scope :not_king, -> { where.not('type = :type', type: 'King') }
 
   # Validations
   # Associations
@@ -36,6 +43,20 @@ class Piece < ApplicationRecord
   def attack_moves
     valid_moves
   end
+
+  def report_line_of_sight
+    @squares_to_block = []
+    moveset.each do |row_movement, col_movement, amount_to_check|
+      has_los = validate_square_king_version(row_movement, col_movement, amount_to_check)
+      if has_los == true
+        @squares_to_block << @squares_involved
+        break
+      end
+    end
+    @squares_to_block.flatten.each(&:set_square_as_urgent)
+    @squares_to_block
+  end
+
   #===Instance Variables
 
   private
@@ -93,5 +114,26 @@ class Piece < ApplicationRecord
       danger << piece.attack_moves
     end
     danger.flatten
+  end
+
+  def validate_square_king_version(row_direction, col_direction, amount_to_check)
+    @squares_involved = [square]
+    row_count = col_count = 0
+    amount_to_check.times do
+      row_count += row_direction
+      col_count += col_direction
+      square = game_squares.find_by(row: (current_row + row_count), column: (current_col + col_count))
+      break if square.nil? || square.piece&.color == color
+
+      if square.piece.nil?
+        @squares_involved << square
+      elsif square.piece.color == enemy
+        @squares_involved << square
+        break
+      end
+    end
+    return true if @squares_involved.flatten.any? { |s| s.piece&.type == 'King' && s.piece&.color == enemy }
+
+    false
   end
 end

@@ -3,8 +3,9 @@
 # table name: squares
 #
 # id                      :bigint       null: false, primary key
-# column                  :index
-# row                     :index
+# column                  :integer      indexed
+# row                     :integer      indexed
+# urgent                  :boolean      indexed     default: false
 # game_id                 :index        null:false, foreign key of game
 # created_at              :datetime     null: false
 # updated_at              :datetime     null: false
@@ -12,6 +13,7 @@
 class Square < ApplicationRecord
   # Callbacks
   # Scopes
+  scope :must_defend, -> { where('urgent = :boolean', boolean: true) }
 
   # Validations
   validates :column, :row, presence: true, numericality: {
@@ -39,5 +41,13 @@ class Square < ApplicationRecord
 
   def self.board_order
     order(row: :desc).order(column: :asc)
+  end
+
+  def set_square_as_urgent
+    update(urgent: true)
+  end
+
+  def set_square_as_unurgent
+    update(urgent: false)
   end
 end

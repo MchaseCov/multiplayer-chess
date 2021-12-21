@@ -49,20 +49,18 @@ class King < Piece
   end
 
   def king_is_in_sights
-    @squares_to_block = []
-    los_pieces = 0
     opposition = color ? game.white_pieces.untaken_pieces : game.color_pieces.untaken_pieces
     opposition.includes(:square).where.not(type: 'King').each do |inspected_piece|
-      puts "inspecting piece #{inspected_piece.type}"
-      path_to_king = inspected_piece.attack_moves
-      next unless path_to_king.any? { |moveable_square| moveable_square.piece&.type == 'King' }
-
-      los_pieces += 1
-      @squares_to_block << path_to_king
-      @squares_to_block << inspected_piece.square
+      return true if inspected_piece.attack_moves.any? { |moveable_square| moveable_square.piece&.type == 'King' }
     end
-    puts "done with the king safety check, returning #{!los_pieces.zero?}"
-    !los_pieces.zero?
-    # if 0 piecs have los, then false; king is not in sights
+    false
+  end
+
+  def can_be_defended
+    team = color ? game.color_pieces.untaken_pieces.not_king : game.white_pieces.untaken_pieces.not_king
+    team.includes(:square).each do |inspected_piece|
+      return true if inspected_piece.valid_moves.any?(&:urgent?)
+    end
+    false
   end
 end

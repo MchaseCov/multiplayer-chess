@@ -44,6 +44,10 @@ class Game < ApplicationRecord
            class_name: :Piece,
            foreign_key: :game_id,
            dependent: :destroy
+  has_many :untaken_pieces, -> { merge(Piece.untaken_pieces) },
+           class_name: :Piece,
+           foreign_key: :game_id,
+           dependent: :destroy
   #===Squares
   has_many :squares, -> { includes(:piece) }, dependent: :destroy
   #===Users

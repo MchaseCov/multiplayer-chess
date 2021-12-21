@@ -58,8 +58,13 @@ class PiecesController < ApplicationController
   end
 
   def enforce_check
-    redirect_to @game unless @piece.type == 'King'
-    @game.declare_winner unless @piece.valid_moves.present?
+    @urgent_squares = @game.squares.must_defend
+    @friendly_king = (@game.turn ? @game.color_pieces.king.first : @game.white_pieces.king.first)
+    # This can totally overlap with that king in sights method please DRY IT
+
+    return if @friendly_king.valid_moves.present? || @friendly_king.can_be_defended
+
+    @game.declare_winner
   end
 
   #=======|BEFORE ACTIONS : EDIT|=======
@@ -102,16 +107,13 @@ class PiecesController < ApplicationController
   def proceed_with_turn
     puts 'proceed with turn'
     @piece.update_attribute(:has_moved, true)
+    @game.squares.where(urgent: true).each(&:set_square_as_unurgent)
     update_turn
   end
 
   def update_turn
     puts 'update turn'
-    @game.update_attribute(:check, false) if @game.check
-    @piece.valid_moves.each do |move|
-      @game.update_attribute(:check, true) if move.piece&.type == 'King'
-    end
-
+    determine_if_check
     @game.update_attribute(:turn, (@piece.color? ? false : true))
   end
 
@@ -123,6 +125,15 @@ class PiecesController < ApplicationController
     @original_target.save
     @original_target_piece&.update_attribute(:taken, false)
     redirect_to @game and return
+  end
+
+  def determine_if_check
+    squares_to_block = @piece.report_line_of_sight
+    if squares_to_block.present?
+      @game.update_attribute(:check, true)
+    elsif @game.check
+      @game.update_attribute(:check, false)
+    end
   end
 
   #=======|IF KING IS CASTLE|=======

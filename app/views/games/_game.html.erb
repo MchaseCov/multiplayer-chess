@@ -6,7 +6,7 @@
 <% end %>
 <div class="grid grid-cols-8 w-max gap-2 chess-board">
   <%game.squares.includes(piece: :user).board_order.each do |square|%>
-    <div class="border-2 w-32 h-32 text-center chess-square" id="<%=square.coordinate%>">
+    <div class="border-2 w-32 h-32 text-center chess-square <%=square.urgent ? "bg-red-600" : ""%>" id="<%=square.coordinate%>">
       <%=square.visual_coordinate%> <br>
       <% if square.piece %>
         <% if game.game_over %>
