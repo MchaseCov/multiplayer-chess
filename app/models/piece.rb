@@ -32,6 +32,7 @@ class Piece < ApplicationRecord
   belongs_to :user, optional: true,
                     inverse_of: :pieces
   # Methods
+  #===Cannot seem to Alias due to valid_moves belonging to respective subclasses
   def attack_moves
     valid_moves
   end

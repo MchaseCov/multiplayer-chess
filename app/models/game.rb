@@ -60,6 +60,10 @@ class Game < ApplicationRecord
                       optional: true
   # Methods
 
+  def declare_winner
+    update(game_over: true, winner: (turn ? white_player : color_player))
+  end
+
   private
 
   def create_game_squares

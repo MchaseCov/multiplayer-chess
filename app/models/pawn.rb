@@ -26,6 +26,6 @@ class Pawn < Piece
   end
 
   def attack_moves
-    collect_valid_moves(attack_moveset(true, false))
+    collect_valid_moves(attack_moveset)
   end
 end
