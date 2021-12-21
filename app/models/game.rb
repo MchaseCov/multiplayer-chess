@@ -3,8 +3,11 @@
 # table name: games
 #
 # id                      :bigint       null: false, primary key
-# white_player_id         :index        null:false, foreign key of 1 user
-# color_player_id         :index                    foreign key of 1 user
+# white_player_id         :index        null: false, foreign key of 1 user
+# color_player_id         :index                     foreign key of 1 user
+# game_over               :boolean                   default: false
+# turn                    :boolean                   default: false
+# winner_id               :index        null: true, foreign key of 1 user
 # created_at              :datetime     null: false
 # updated_at              :datetime     null: false
 #
@@ -50,6 +53,10 @@ class Game < ApplicationRecord
                             foreign_key: :color_player_id,
                             inverse_of: :color_games,
                             optional: true
+  belongs_to :winner, class_name: :User,
+                      foreign_key: :winner_id,
+                      inverse_of: :won_games,
+                      optional: true
   # Methods
 
   private

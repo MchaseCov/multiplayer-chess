@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_21_010549) do
+ActiveRecord::Schema.define(version: 2021_12_21_020009) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -20,8 +20,12 @@ ActiveRecord::Schema.define(version: 2021_12_21_010549) do
     t.bigint "color_player_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "game_over", default: false
+    t.boolean "turn", default: false
+    t.bigint "winner_id"
     t.index ["color_player_id"], name: "index_games_on_color_player_id"
     t.index ["white_player_id"], name: "index_games_on_white_player_id"
+    t.index ["winner_id"], name: "index_games_on_winner_id"
   end
 
   create_table "pieces", force: :cascade do |t|
@@ -38,6 +42,7 @@ ActiveRecord::Schema.define(version: 2021_12_21_010549) do
     t.index ["game_id"], name: "index_pieces_on_game_id"
     t.index ["square_id"], name: "index_pieces_on_square_id"
     t.index ["taken"], name: "index_pieces_on_taken"
+    t.index ["type"], name: "index_pieces_on_type"
     t.index ["user_id"], name: "index_pieces_on_user_id"
   end
 
@@ -66,6 +71,7 @@ ActiveRecord::Schema.define(version: 2021_12_21_010549) do
 
   add_foreign_key "games", "users", column: "color_player_id"
   add_foreign_key "games", "users", column: "white_player_id"
+  add_foreign_key "games", "users", column: "winner_id"
   add_foreign_key "pieces", "games"
   add_foreign_key "pieces", "squares"
   add_foreign_key "pieces", "users"

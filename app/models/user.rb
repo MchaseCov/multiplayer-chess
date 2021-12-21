@@ -28,6 +28,10 @@ class User < ApplicationRecord
                          foreign_key: :color_player_id,
                          inverse_of: :color_player,
                          dependent: :destroy
+  has_many :won_games, class_name: :Game,
+                       foreign_key: :winner_id,
+                       inverse_of: :winner
+  #===Pieces
   has_many :pieces, inverse_of: :user
 
   # Methods

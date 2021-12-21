@@ -2,13 +2,14 @@
 #
 # table name: pieces
 #
-# id                      :bigint       null: false, primary key
-# type                    :string       STI
-# color                   :boolean
-# taken                   :boolean      default: false
+# id                      :bigint       null: false      primary key
+# type                    :string       STI              index
+# color                   :boolean                       indexed
+# taken                   :boolean      default: false   indexed
 # has_moved               :boolean      default: false
-# game_id                 :index        null:false, foreign key of game
-# square_id               :index                    foreign key of square
+# user_id                 :index                         foreign key of user
+# game_id                 :index        null:false,      foreign key of game
+# square_id               :index                         foreign key of square
 # created_at              :datetime     null: false
 # updated_at              :datetime     null: false
 #

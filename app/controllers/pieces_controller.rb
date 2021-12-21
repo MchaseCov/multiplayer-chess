@@ -2,10 +2,13 @@ class PiecesController < ApplicationController
   before_action :set_edit_variables, only: %i[edit]
   before_action :set_update_variables,
                 only: %i[update_pawn update_knight update_rook update_bishop update_queen update_king]
+  before_action :validate_turn
   before_action :shared_update_assignments,
                 only: %i[update_pawn update_knight update_rook update_bishop update_queen]
+  after_action :update_turn, only: %i[update_pawn update_knight update_rook update_bishop update_queen update_king]
+
   def edit
-    redirect_to @piece.game if @squares.blank?
+    redirect_to @game if @squares.blank?
   end
 
   def update_pawn
@@ -25,10 +28,10 @@ class PiecesController < ApplicationController
   def update_king
     return shared_update_assignments if @piece.has_moved == true
 
-    if @square == @piece.game.squares.find_by(row: @piece.square.row, column: (@piece.square.column + 2))
-      castle(@piece.game.pieces.where(type: 'Rook', color: @piece.color).first, 1) # Right
-    elsif @square == @piece.game.squares.find_by(row: @piece.square.row, column: @piece.square.column(-2))
-      castle(@piece.game.pieces.where(type: 'Rook', color: @piece.color).last, -1) # Left
+    if @square == @game.squares.find_by(row: @piece.square.row, column: (@piece.square.column + 2))
+      castle(@game.pieces.where(type: 'Rook', color: @piece.color).first, 1) # Right
+    elsif @square == @game.squares.find_by(row: @piece.square.row, column: @piece.square.column(-2))
+      castle(@game.pieces.where(type: 'Rook', color: @piece.color).last, -1) # Left
     else
       shared_update_assignments
     end
@@ -44,7 +47,8 @@ class PiecesController < ApplicationController
 
   def set_update_variables
     @piece = current_user.pieces.find(params[:piece_id])
-    @square = @piece.game.squares.find(params[:square])
+    @game = @piece.game
+    @square = @game.squares.find(params[:square])
     return 401 if @square.piece&.color == @piece.color
   end
 
@@ -60,5 +64,17 @@ class PiecesController < ApplicationController
     @square.piece = @piece
     rook.update_attribute(:has_moved, true)
     @piece.update_attribute(:has_moved, true)
+  end
+
+  def validate_turn
+    if @game.turn?
+      redirect_to @game unless current_user == @game.color_player
+    else
+      redirect_to @game unless current_user == @game.white_player
+    end
+  end
+
+  def update_turn
+    @game.update_attribute(:turn, (@piece.color? ? false : true))
   end
 end
