@@ -51,8 +51,8 @@ class Game < ApplicationRecord
                             inverse_of: :white_games
   belongs_to :color_player, class_name: :User,
                             foreign_key: :color_player_id,
-                            inverse_of: :color_games,
-                            optional: true
+                            inverse_of: :color_games
+
   belongs_to :winner, class_name: :User,
                       foreign_key: :winner_id,
                       inverse_of: :won_games,

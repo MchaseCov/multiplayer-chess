@@ -24,8 +24,7 @@ class Square < ApplicationRecord
   #===Pieces
   has_one :piece, inverse_of: :square
   #===Games
-  belongs_to :game, validate: true,
-                    touch: true
+  belongs_to :game, validate: true
   # Methods
   def coordinate
     "(#{column},#{row})"

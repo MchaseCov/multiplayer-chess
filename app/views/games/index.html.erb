@@ -1,7 +1,8 @@
+Start a game: 
+<%= turbo_frame_tag id="user_list", src:users_path, target:"_top" %>
 list of all games:
 <div>
   <%@games.each do |g|%>
     <%= link_to "#{g.white_player.username}'s game", g %><br>
   <% end %>
-  <%= button_to "new game", games_path %>
 </div>

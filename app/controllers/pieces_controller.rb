@@ -1,11 +1,15 @@
 class PiecesController < ApplicationController
-  before_action :set_edit_variables, only: %i[edit]
-  before_action :set_update_variables,
-                only: %i[update_pawn update_knight update_rook update_bishop update_queen update_king]
+  #== All
+  before_action :set_game_and_piece
   before_action :validate_turn
+  #=== Edit
+  before_action :fetch_valid_moves_for_piece, only: %i[edit]
+  #=== Updating
+  before_action :set_selected_square,
+                except: %i[edit]
   before_action :shared_update_assignments,
                 only: %i[update_pawn update_knight update_rook update_bishop update_queen]
-  after_action :update_turn, only: %i[update_pawn update_knight update_rook update_bishop update_queen update_king]
+  after_action :update_turn, except: %i[edit]
 
   def edit
     redirect_to @game if @squares.blank?
@@ -30,7 +34,7 @@ class PiecesController < ApplicationController
 
     if @square == @game.squares.find_by(row: @piece.square.row, column: (@piece.square.column + 2))
       castle(@game.pieces.where(type: 'Rook', color: @piece.color).first, 1) # Right
-    elsif @square == @game.squares.find_by(row: @piece.square.row, column: @piece.square.column(-2))
+    elsif @square == @game.squares.find_by(row: @piece.square.row, column: @piece.square.column - 2)
       castle(@game.pieces.where(type: 'Rook', color: @piece.color).last, -1) # Left
     else
       shared_update_assignments
@@ -39,15 +43,16 @@ class PiecesController < ApplicationController
 
   private
 
-  def set_edit_variables
-    @piece = Piece.find(params[:id])
-    @squares = @piece.valid_moves
+  def set_game_and_piece
+    @piece = current_user.pieces.find(params[:piece_id] || params[:id])
     @game = @piece.game
   end
 
-  def set_update_variables
-    @piece = current_user.pieces.find(params[:piece_id])
-    @game = @piece.game
+  def fetch_valid_moves_for_piece
+    @squares = @piece.valid_moves
+  end
+
+  def set_selected_square
     @square = @game.squares.find(params[:square])
     return 401 if @square.piece&.color == @piece.color
   end
@@ -68,9 +73,9 @@ class PiecesController < ApplicationController
 
   def validate_turn
     if @game.turn?
-      redirect_to @game unless current_user == @game.color_player
+      redirect_to @game unless current_user == @game.color_player && @piece.color
     else
-      redirect_to @game unless current_user == @game.white_player
+      redirect_to @game unless current_user == @game.white_player && !@piece.color
     end
   end
 

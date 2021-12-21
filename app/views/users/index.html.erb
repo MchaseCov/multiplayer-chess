@@ -1,0 +1,7 @@
+<%= turbo_frame_tag id="user_list", target:"_top" do %>
+  <% @users.each do |user|%>
+    <%= button_to games_path(user: user) do %>
+      <%= user.username %>
+    <% end %>
+  <% end %>
+<% end %>

@@ -27,8 +27,7 @@ class Piece < ApplicationRecord
   belongs_to :game
   #===Squares
   belongs_to :square, optional: true,
-                      inverse_of: :piece,
-                      touch: true
+                      inverse_of: :piece
   #===Users
   belongs_to :user, optional: true,
                     inverse_of: :pieces
