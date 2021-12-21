@@ -30,7 +30,11 @@ class Piece < ApplicationRecord
                       touch: true
 
   # Methods
+  def attack_moves
+    valid_moves
+  end
   #===Instance Variables
+
   private
 
   def enemy
@@ -46,13 +50,13 @@ class Piece < ApplicationRecord
   end
 
   def game_squares
-    @game_squares ||= game.squares.includes(:piece)
+    @game_squares ||= game.squares
   end
 
   #===Moveset Methods
 
   #======Validation
-  def collect_valid_moves
+  def collect_valid_moves(moveset)
     validated_moves = []
     moveset.each do |row_movement, col_movement, amount_to_check|
       validated_moves += validate_square(row_movement, col_movement, amount_to_check)
@@ -81,9 +85,9 @@ class Piece < ApplicationRecord
 
   def dangerous_positions
     danger = []
-    opposition = color ? game.white_pieces : game.color_pieces
-    opposition.untaken_pieces.includes(:square).where.not(type: 'King').each do |piece|
-      danger << piece.valid_moves
+    opposition = color ? game.white_pieces.untaken_pieces : game.color_pieces.untaken_pieces
+    opposition.includes(:square).where.not(type: 'King').each do |piece|
+      danger << piece.attack_moves
     end
     danger.flatten
   end

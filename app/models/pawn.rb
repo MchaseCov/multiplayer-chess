@@ -1,6 +1,6 @@
 class Pawn < Piece
   def valid_moves
-    collect_valid_moves + collect_valid_attacks
+    collect_valid_moves(moveset) + collect_valid_moves(attack_moveset)
   end
 
   def moveset
@@ -13,9 +13,9 @@ class Pawn < Piece
     end
   end
 
-  def attack_moveset
-    @no_enemy = false
-    @only_enemy = true
+  def attack_moveset(no_enemy = false, only_enemy = true)
+    @no_enemy = no_enemy
+    @only_enemy = only_enemy
     if color
       [[-1, +1, 1], # To Down & Right
        [-1, -1, 1]] # To Down & Left
@@ -25,11 +25,7 @@ class Pawn < Piece
     end
   end
 
-  def collect_valid_attacks
-    validated_moves = []
-    attack_moveset.each do |row_movement, col_movement, amount_to_check|
-      validated_moves += validate_square(row_movement, col_movement, amount_to_check)
-    end
-    validated_moves
+  def attack_moves
+    collect_valid_moves(attack_moveset(true, false))
   end
 end
