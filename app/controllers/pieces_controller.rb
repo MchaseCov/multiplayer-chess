@@ -6,15 +6,17 @@ class PiecesController < ApplicationController
   #=== Edit
   before_action :fetch_valid_moves_for_piece, only: %i[edit]
   #=== Updating
-  before_action :set_selected_square, :save_current_game_state, :process_turn,
+  before_action :set_selected_square, :save_current_game_state,
                 only: %i[update_pawn update_king update_knight update_rook update_bishop update_queen]
+
+  before_action :process_turn,
+                only: %i[update_pawn update_knight update_rook update_bishop update_queen]
 
   def edit
     redirect_to @game if @squares.blank?
   end
 
   def update_pawn
-    puts 'process turn all complete now, back to pawn shit'
     unless (@piece.square.row == 1 && @piece.color == true) || (@piece.square.row == 8 && @piece.color == false)
       redirect_to @game and return
     end
@@ -78,7 +80,6 @@ class PiecesController < ApplicationController
   end
 
   def save_current_game_state
-    puts 'saving game state'
     @piece_original_square = @piece.square
     @original_target = @square
     @original_target_piece = @square.piece
@@ -86,12 +87,10 @@ class PiecesController < ApplicationController
 
   #=======|SHARED VALIDATION|======
   def process_turn
-    puts 'process_turn'
     move_piece? ? proceed_with_turn : rollback_turn
   end
 
   def move_piece?
-    puts 'move piece?'
     @square.piece&.update_attribute(:taken, true)
     @square.piece = @piece
     @square.save
@@ -99,26 +98,22 @@ class PiecesController < ApplicationController
   end
 
   def validate_king_safety_after_move?
-    puts 'validate king safety after move?'
     @king = @game.pieces.where(type: 'King', color: @piece.color).first
     !!@king.king_is_in_sights # false if king safe, true if not safe
   end
 
   def proceed_with_turn
-    puts 'proceed with turn'
     @piece.update_attribute(:has_moved, true)
     @game.squares.where(urgent: true).each(&:set_square_as_unurgent)
     update_turn
   end
 
   def update_turn
-    puts 'update turn'
     determine_if_check
     @game.update_attribute(:turn, (@piece.color? ? false : true))
   end
 
   def rollback_turn
-    puts 'rollback turn'
     @piece_original_square.piece = @piece
     @original_target.piece = @original_target_piece
     @piece_original_square.save
@@ -143,5 +138,6 @@ class PiecesController < ApplicationController
     @square.piece = @piece
     rook.update_attribute(:has_moved, true)
     @piece.update_attribute(:has_moved, true)
+    redirect_to @game and return
   end
 end
