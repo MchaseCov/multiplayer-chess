@@ -16,10 +16,10 @@ class Game < ApplicationRecord
 
   after_create_commit do
     create_game_squares
-    create_pawns(false, 2)
-    create_pawns(true, 7)
-    create_back_row(false, 1)
-    create_back_row(true, 8)
+    create_pawns(false, 2, white_player)
+    create_back_row(false, 1, white_player)
+    create_pawns(true, 7, color_player)
+    create_back_row(true, 8, color_player)
   end
   # Scopes
   # Validations
@@ -62,18 +62,18 @@ class Game < ApplicationRecord
     end
   end
 
-  def create_pawns(color, row) # STI cannot create through the square directly
+  def create_pawns(color, row, user) # STI cannot create through the square directly
     squares.where(row: row).each do |square|
-      Pawn.create(color: color, game: square.game, square: square)
+      Pawn.create(color: color, game: square.game, square: square, user: user)
     end
   end
 
-  def create_back_row(color, row)
+  def create_back_row(color, row, user)
     row = squares.where(row: row)
-    row.where(column: [1, 8]).each { |s| Rook.create(color: color, game: s.game, square: s) }
-    row.where(column: [2, 7]).each { |s| Knight.create(color: color, game: s.game, square: s) }
-    row.where(column: [3, 6]).each { |s| Bishop.create(color: color, game: s.game, square: s) }
-    row.where(column: 4).each      { |s| Queen.create(color: color, game: s.game, square: s) }
-    row.where(column: 5).each      { |s| King.create(color: color, game: s.game, square: s) }
+    row.where(column: [1, 8]).each { |s| Rook.create(color: color, game: s.game, square: s, user: user) }
+    row.where(column: [2, 7]).each { |s| Knight.create(color: color, game: s.game, square: s, user: user) }
+    row.where(column: [3, 6]).each { |s| Bishop.create(color: color, game: s.game, square: s, user: user) }
+    row.where(column: 4).each      { |s| Queen.create(color: color, game: s.game, square: s, user: user) }
+    row.where(column: 5).each      { |s| King.create(color: color, game: s.game, square: s, user: user) }
   end
 end

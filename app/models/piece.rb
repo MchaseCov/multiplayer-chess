@@ -23,12 +23,14 @@ class Piece < ApplicationRecord
   # Validations
   # Associations
   #===Games
-  belongs_to :game, touch: true
+  belongs_to :game
   #===Squares
   belongs_to :square, optional: true,
                       inverse_of: :piece,
                       touch: true
-
+  #===Users
+  belongs_to :user, optional: true,
+                    inverse_of: :pieces
   # Methods
   def attack_moves
     valid_moves

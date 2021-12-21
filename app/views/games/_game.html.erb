@@ -1,9 +1,9 @@
 <div class="grid grid-cols-8 w-max gap-2 chess-board">
-  <%game.squares.board_order.each do |square|%>
+  <%game.squares.includes(piece: :user).board_order.each do |square|%>
     <div class="border-2 w-32 h-32 text-center chess-square" id="<%=square.coordinate%>">
       <%=square.visual_coordinate%> <br>
       <% if square.piece %>
-        <%= link_to edit_piece_path(square.piece) do %>
+        <%= link_to edit_piece_path(square.piece), class:"pointer-events-none user-#{square.piece.user&.id}-piece" do %>
           <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
         <% end %>
       <% end %>

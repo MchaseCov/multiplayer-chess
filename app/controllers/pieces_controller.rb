@@ -43,7 +43,7 @@ class PiecesController < ApplicationController
   end
 
   def set_update_variables
-    @piece = Piece.find(params[:piece_id]) # When adding user ownership be sure to change this to user.piece.find
+    @piece = current_user.pieces.find(params[:piece_id])
     @square = @piece.game.squares.find(params[:square])
     return 401 if @square.piece&.color == @piece.color
   end

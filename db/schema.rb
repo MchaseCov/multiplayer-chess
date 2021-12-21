@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_20_202951) do
+ActiveRecord::Schema.define(version: 2021_12_21_010549) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,10 +33,12 @@ ActiveRecord::Schema.define(version: 2021_12_20_202951) do
     t.bigint "square_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "user_id"
     t.index ["color"], name: "index_pieces_on_color"
     t.index ["game_id"], name: "index_pieces_on_game_id"
     t.index ["square_id"], name: "index_pieces_on_square_id"
     t.index ["taken"], name: "index_pieces_on_taken"
+    t.index ["user_id"], name: "index_pieces_on_user_id"
   end
 
   create_table "squares", force: :cascade do |t|
@@ -66,5 +68,6 @@ ActiveRecord::Schema.define(version: 2021_12_20_202951) do
   add_foreign_key "games", "users", column: "white_player_id"
   add_foreign_key "pieces", "games"
   add_foreign_key "pieces", "squares"
+  add_foreign_key "pieces", "users"
   add_foreign_key "squares", "games"
 end
