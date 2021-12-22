@@ -10,18 +10,15 @@ class PiecesController < ApplicationController
                 only: %i[update_pawn update_king update_knight update_rook update_bishop update_queen]
 
   before_action :process_turn,
-                only: %i[update_pawn update_knight update_rook update_bishop update_queen]
+                only: %i[update_knight update_rook update_bishop update_queen]
 
   def edit
     redirect_to @game if @squares.blank?
   end
 
   def update_pawn
-    unless (@piece.square.row == 1 && @piece.color == true) || (@piece.square.row == 8 && @piece.color == false)
-      redirect_to @game and return
-    end
-
-    @piece.update_attribute(:type, 'Queen')
+    promote_pawn if @square.row.in? [1, 8]
+    process_turn
   end
 
   def update_king
@@ -89,6 +86,7 @@ class PiecesController < ApplicationController
   end
 
   def save_current_game_state
+    @piece_original_type = @piece.type
     @piece_original_square = @piece.square
     @original_target = @square
     @original_target_piece = @square.piece
@@ -123,6 +121,7 @@ class PiecesController < ApplicationController
   end
 
   def rollback_turn
+    @piece.type = @piece_original_type
     @piece_original_square.piece = @piece
     @original_target.piece = @original_target_piece
     @piece_original_square.save
@@ -149,5 +148,11 @@ class PiecesController < ApplicationController
     rook.update_attribute(:has_moved, true)
     @piece.update_attribute(:has_moved, true)
     redirect_to @game and return
+  end
+
+  #======|IF PAWN IS PROMOTE|=======
+  def promote_pawn
+    option = params[:upgrade].to_i || 1
+    @piece.promote(option)
   end
 end

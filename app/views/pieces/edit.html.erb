@@ -3,10 +3,20 @@
   <div class="grid grid-cols-8 w-max gap-2 chess-board">
     <%@game.squares.board_order.each do |square|%>
       <% if @squares.include?(square) %>
-        <%= button_to  controller: "pieces", action: "update_#{@piece.type.downcase}", piece_id: @piece, square: square.id, class:"block border-2 w-32 h-32 text-center chess-square bg-indigo-400", id:"#{square.coordinate}" do %>
-          <%=square.visual_coordinate%> <br>
-          <% if square.piece %>
-            <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
+        <% if (@piece.type == "Pawn") && (square.row.in? [1,8]) %>
+          <%= content_tag :div, class:"block border-2 w-32 h-32 text-center chess-square bg-indigo-400", id:"#{square.coordinate}" do %>
+            <%=square.visual_coordinate%> <br>
+            <% if square.piece %>
+              <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
+            <% end %>
+            <%= render "pawn_form", piece: @piece, square: square%>
+          <% end %>
+        <% else %>
+          <%= button_to controller: "pieces", action: "update_#{@piece.type.downcase}", piece_id: @piece, square: square.id, class:"block border-2 w-32 h-32 text-center chess-square bg-indigo-400", id:"#{square.coordinate}" do %>
+            <%=square.visual_coordinate%> <br>
+            <% if square.piece %>
+              <i class="fas fa-chess-<%=square.piece.type.downcase%> text-4xl <%=square.piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
+            <% end %>
           <% end %>
         <% end %>
       <% else %>

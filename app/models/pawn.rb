@@ -26,6 +26,12 @@ class Pawn < Piece
   end
 
   def attack_moves
-    collect_valid_moves(attack_moveset)
+    collect_valid_moves(attack_moveset(true, false))
+  end
+
+  def promote(promotion)
+    options = %w[Queen Knight Rook Bishop]
+    choice = options[promotion] || 'Queen'
+    update(type: choice)
   end
 end

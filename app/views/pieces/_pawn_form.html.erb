@@ -1,0 +1,7 @@
+<div class="flex z-10">
+  <%["Queen", "Knight", "Rook", "Bishop"].each_with_index do |option, index|%>
+    <%= button_to controller: "pieces", action: "update_pawn", piece_id: piece, square: square.id, upgrade: index, class:"mx-1" do %>
+      <i class="fas fa-chess-<%=option.downcase%>  text-4xl <%=piece.color? ? "text-neutral-900" : "text-neutral-50 white-piece" %>"></i>
+    <% end %>
+  <% end %>
+</div>
