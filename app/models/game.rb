@@ -64,8 +64,32 @@ class Game < ApplicationRecord
                       optional: true
   # Methods
 
-  def declare_winner
-    update(game_over: true, winner: (turn ? white_player : color_player))
+  def declare_player_as_winner(player)
+    update(game_over: true, winner: player)
+  end
+
+  def declare_stalemate
+    update(game_over: true, winner: nil)
+  end
+
+  def current_team_live_pieces
+    turn ? color_pieces.untaken_pieces : white_pieces.untaken_pieces
+  end
+
+  def opposing_team_live_pieces
+    turn ? white_pieces.untaken_pieces : color_pieces.untaken_pieces
+  end
+
+  def current_player
+    turn ? color_player : white_player
+  end
+
+  def opposing_player
+    turn ? white_player : color_player
+  end
+
+  def current_color
+    turn ? true : false
   end
 
   private

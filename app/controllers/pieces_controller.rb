@@ -2,6 +2,8 @@ class PiecesController < ApplicationController
   #== All
   before_action :set_game_and_piece, :validate_ongoing_game, :validate_permission_to_move
   #=== Edit
+  before_action :enforce_check, if: -> { @game.check }, only: %i[edit]
+  before_action :stalemate, if: -> { @game.current_team_live_pieces.size == 1 }, only: %i[edit]
   before_action :fetch_valid_moves_for_piece, only: %i[edit]
   #=== Updating
   before_action :set_selected_square, :save_current_game_state,
@@ -58,14 +60,22 @@ class PiecesController < ApplicationController
     redirect_to @game and return unless @game.current_player == current_user && @piece.color == @game.current_color
   end
 
-  def enforce_check
-    @urgent_squares = @game.squares.must_defend
-    @friendly_king = (@game.turn ? @game.color_pieces.king.first : @game.white_pieces.king.first)
-    # This can totally overlap with that king in sights method please DRY IT
+  def enforce_check(defender_color = @piece.color)
+    urgent_squares = ->(square) { square.urgent? }
+    king = @game.untaken_pieces.where(color: defender_color).king.first
+    return if king.escape_checkmate_moves
 
-    return if @friendly_king.valid_moves.present? || @friendly_king.can_be_defended
+    return if king.check_potential_moves_for(
+      @game.untaken_pieces.where(color: defender_color).includes(:square), urgent_squares
+    )
 
-    @game.declare_winner
+    @game.declare_player_as_winner(king.user == @game.white_player ? @game.color_player : @game.white_player)
+  end
+
+  def stalemate
+    return if @piece.valid_moves.present?
+
+    @game.declare_stalemate
   end
 
   #=======|BEFORE ACTIONS : EDIT|=======
@@ -123,8 +133,9 @@ class PiecesController < ApplicationController
 
   def determine_if_check
     squares_to_block = @piece.report_line_of_sight
-    if squares_to_block.present?
+    if squares_to_block == true
       @game.update_attribute(:check, true)
+      enforce_check(!@piece.color)
     elsif @game.check
       @game.update_attribute(:check, false)
     end

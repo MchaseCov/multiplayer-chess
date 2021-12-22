@@ -5,15 +5,29 @@ class King < Piece
 
   def collect_valid_safe_king_moves
     valid_moves = collect_valid_moves(moveset)
-    return valid_moves if valid_moves.empty?
+    return valid_moves if valid_moves.blank?
 
-    valid_moves += castle_moves if has_moved == false
+    if has_moved == false
+      castle_options = castle_moves
+      valid_moves += castle_options unless castle_options.blank?
+    end
 
     filter_unsafe_moves(valid_moves)
   end
 
+  def find_enemy_range
+    danger = []
+    game.opposing_team_live_pieces.includes(:square).each do |p|
+      danger << p.attack_moves
+    end
+    danger.flatten
+  end
+
   def filter_unsafe_moves(king_moves)
-    dangerous_positions.each do |position|
+    find_enemy_range.each do |position|
+      king_moves.delete(position)
+    end
+    more_squares_to_check.each do |position|
       king_moves.delete(position)
     end
     king_moves
@@ -37,6 +51,10 @@ class King < Piece
     @castleable << game_squares.find_by(row: current_row, column: (current_col + distance)) if tiles.size == (size)
   end
 
+  def attack_moves
+    collect_valid_moves(moveset)
+  end
+
   def moveset
     [[+1, +0, 1], # Y Upwards
      [-1, +0, 1], # Y Downwards
@@ -48,19 +66,22 @@ class King < Piece
      [-1, -1, 1]] # To Down & Left
   end
 
-  def king_is_in_sights
-    opposition = color ? game.white_pieces.untaken_pieces : game.color_pieces.untaken_pieces
-    opposition.includes(:square).where.not(type: 'King').each do |inspected_piece|
-      return true if inspected_piece.attack_moves.any? { |moveable_square| moveable_square.piece&.type == 'King' }
+  def escape_checkmate_moves
+    valid_moves = collect_valid_moves(moveset).flatten
+    more_squares_to_check.each do |position|
+      valid_moves.delete(position)
     end
-    false
+    game.squares.where(urgent: true).to_a.flatten.each do |position|
+      valid_moves.delete(position)
+    end
+    valid_moves.present? ? true : false
   end
 
-  def can_be_defended
-    team = color ? game.color_pieces.untaken_pieces.not_king : game.white_pieces.untaken_pieces.not_king
-    team.includes(:square).each do |inspected_piece|
-      return true if inspected_piece.valid_moves.any?(&:urgent?)
+  def more_squares_to_check
+    danger = []
+    game.opposing_team_live_pieces.includes(:square).each do |p|
+      danger << p.report_line_of_sight_of_friendly_piece
     end
-    false
+    danger.flatten
   end
 end

@@ -45,18 +45,56 @@ class Piece < ApplicationRecord
   end
 
   def report_line_of_sight
-    @squares_to_block = []
-    moveset.each do |row_movement, col_movement, amount_to_check|
-      has_los = validate_square_king_version(row_movement, col_movement, amount_to_check)
-      if has_los == true
-        @squares_to_block << @squares_involved
+    @squares_to_block ||= []
+    attack_moveset.each do |row_movement, col_movement, amount_to_check|
+      los_lines = validate_square(row_movement, col_movement, amount_to_check, square)
+      @squares_to_block << los_lines if los_lines.flatten.any? do |s|
+                                          s.piece&.type == 'King' && s.piece&.color == !color
+                                        end
+    end
+    @squares_to_block.flatten.each(&:set_square_as_urgent)
+    @squares_to_block.present? ? true : false
+  end
+
+  def check_potential_moves_for(pieces, block)
+    pieces.each do |piece|
+      return true if piece.attack_moves.any? block.call(square)
+    end
+    false
+  end
+
+  #====RELATED TO FINDING PIECES THAT ARE UNSAFE FOR KING EVEN IF IT THINKS ITS SAFE WIP WIP WIP WIP
+  def report_line_of_sight_of_friendly_piece
+    @squares_that_are_actually_not_safe ||= []
+    attack_moveset.each do |row_movement, col_movement, amount_to_check|
+      stpcsaf = check_for_friendly(row_movement, col_movement, amount_to_check)
+      @squares_that_are_actually_not_safe << stpcsaf
+    end
+    @squares_that_are_actually_not_safe.flatten
+  end
+
+  def check_for_friendly(row_direction, col_direction, amount_to_check, inclusion = nil)
+    squares_that_piece_can_spot_a_friendly = [inclusion]
+    row_count = col_count = 0
+    amount_to_check.times do
+      row_count += row_direction
+      col_count += col_direction
+      square = game_squares.find_by(row: (current_row + row_count), column: (current_col + col_count))
+      break if square.nil?
+
+      if square.piece&.color == color
+        squares_that_piece_can_spot_a_friendly << square
+        break
+      elsif square.piece.nil?
+        squares_that_piece_can_spot_a_friendly << square
+      elsif square.piece.color == !color
         break
       end
     end
-    @squares_to_block.flatten.each(&:set_square_as_urgent)
-    @squares_to_block
+    squares_that_piece_can_spot_a_friendly
   end
 
+  #============================================================================================
   #===Instance Variables
 
   private
@@ -80,6 +118,7 @@ class Piece < ApplicationRecord
   #===Moveset Methods
 
   #======Validation
+
   def collect_valid_moves(moveset)
     validated_moves = []
     moveset.each do |row_movement, col_movement, amount_to_check|
@@ -88,8 +127,8 @@ class Piece < ApplicationRecord
     validated_moves
   end
 
-  def validate_square(row_direction, col_direction, amount_to_check)
-    valid = []
+  def validate_square(row_direction, col_direction, amount_to_check, inclusion = nil)
+    valid = [inclusion]
     row_count = col_count = 0
     amount_to_check.times do
       row_count += row_direction
@@ -99,7 +138,7 @@ class Piece < ApplicationRecord
 
       if square.piece.nil?
         valid << square unless @only_enemy
-      elsif square.piece.color == enemy
+      elsif square.piece.color == !color
         valid << square unless @no_enemy
         break
       end
