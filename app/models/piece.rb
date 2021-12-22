@@ -60,13 +60,6 @@ class Piece < ApplicationRecord
     @squares_to_block.present? ? true : false
   end
 
-  def check_potential_moves_for(pieces, block)
-    pieces.each do |piece|
-      return true if piece.attack_moves.any? block.call(square)
-    end
-    false
-  end
-
   #====RELATED TO FINDING PIECES THAT ARE UNSAFE FOR KING EVEN IF IT THINKS ITS SAFE WIP WIP WIP WIP
   def report_line_of_sight_of_friendly_piece
     @squares_that_are_actually_not_safe ||= []
@@ -74,7 +67,7 @@ class Piece < ApplicationRecord
       stpcsaf = check_for_friendly(row_movement, col_movement, amount_to_check)
       @squares_that_are_actually_not_safe << stpcsaf
     end
-    @squares_that_are_actually_not_safe.flatten
+    @squares_that_are_actually_not_safe.flatten.compact
   end
 
   def check_for_friendly(row_direction, col_direction, amount_to_check, inclusion = nil)
@@ -92,12 +85,28 @@ class Piece < ApplicationRecord
       elsif square.piece.nil?
         squares_that_piece_can_spot_a_friendly << square
       elsif square.piece.color == !color
-        break
+        break unless square.piece.type == 'King'
       end
     end
     squares_that_piece_can_spot_a_friendly
   end
 
+  def report_line_of_sight_on_piece(takeable_pieces)
+    line_of_sight_on_piece ||= []
+    attack_moveset.each do |row_movement, col_movement, amount_to_check|
+      los_lines = check_for_friendly(row_movement, col_movement, amount_to_check).flatten.compact
+      line_of_sight_on_piece << los_lines if los_lines.any? { |s| s.piece.in? takeable_pieces }
+    end
+    line_of_sight_on_piece.flatten.compact
+  end
+
+  def collect_valid_moves(moveset)
+    validated_moves = []
+    moveset.each do |row_movement, col_movement, amount_to_check|
+      validated_moves += validate_square(row_movement, col_movement, amount_to_check)
+    end
+    validated_moves.compact
+  end
   #============================================================================================
   #===Instance Variables
 
@@ -122,14 +131,6 @@ class Piece < ApplicationRecord
   #===Moveset Methods
 
   #======Validation
-
-  def collect_valid_moves(moveset)
-    validated_moves = []
-    moveset.each do |row_movement, col_movement, amount_to_check|
-      validated_moves += validate_square(row_movement, col_movement, amount_to_check)
-    end
-    validated_moves
-  end
 
   def validate_square(row_direction, col_direction, amount_to_check, inclusion = nil)
     valid = [inclusion]

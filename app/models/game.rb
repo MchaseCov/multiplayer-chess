@@ -92,6 +92,25 @@ class Game < ApplicationRecord
     turn ? true : false
   end
 
+  def opposing_team_of_piece(piece)
+    piece.color ? white_pieces.untaken_pieces : color_pieces.untaken_pieces
+  end
+
+  def team_of_piece(piece)
+    piece.color ? color_pieces.untaken_pieces : white_pieces.untaken_pieces
+  end
+
+  def full_team_of_piece(piece)
+    piece.color ? color_pieces : white_pieces
+  end
+
+  def team_can_intercept_checkmate(team)
+    team.each do |piece|
+      return true if piece.attack_moves.any?(&:urgent?)
+    end
+    false
+  end
+
   private
 
   def create_game_squares

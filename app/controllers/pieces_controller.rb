@@ -57,13 +57,10 @@ class PiecesController < ApplicationController
   end
 
   def enforce_check(defender_color = @piece.color)
-    urgent_squares = ->(square) { square.urgent? }
     king = @game.untaken_pieces.where(color: defender_color).king.first
-    return if king.escape_checkmate_moves
 
-    return if king.check_potential_moves_for(
-      @game.untaken_pieces.where(color: defender_color).includes(:square), urgent_squares
-    )
+    return if @game.team_can_intercept_checkmate(@game.team_of_piece(king).not_king.includes(:square))
+    return if king.escape_checkmate_moves
 
     @game.declare_player_as_winner(king.user == @game.white_player ? @game.color_player : @game.white_player)
   end
@@ -105,7 +102,7 @@ class PiecesController < ApplicationController
 
   def validate_king_safety_after_move
     @king = @game.current_team_live_pieces.king.first
-    @king.find_enemy_range.flatten.any? { |s| s&.piece == @king }
+    @king.all_current_attacking_moves_of_team(@game.opposing_team_of_piece(@king)).any? { |s| s&.piece == @king }
   end
 
   def proceed_with_turn
