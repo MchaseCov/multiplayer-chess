@@ -1,8 +1,6 @@
 class PiecesController < ApplicationController
   #== All
-  before_action :set_game_and_piece
-  before_action :validate_permission_to_move
-  before_action :enforce_check, if: -> { @game.check }
+  before_action :set_game_and_piece, :validate_ongoing_game, :validate_permission_to_move
   #=== Edit
   before_action :fetch_valid_moves_for_piece, only: %i[edit]
   #=== Updating
@@ -52,11 +50,12 @@ class PiecesController < ApplicationController
     @game = @piece.game
   end
 
-  def validate_permission_to_move
+  def validate_ongoing_game
     redirect_to @game and return if @game.game_over
+  end
 
-    redirect_to @game and return if @game.turn && !(current_user == @game.color_player && @piece.color)
-    redirect_to @game and return if !@game.turn && !(current_user == @game.white_player && !@piece.color)
+  def validate_permission_to_move
+    redirect_to @game and return unless @game.current_player == current_user && @piece.color == @game.current_color
   end
 
   def enforce_check
