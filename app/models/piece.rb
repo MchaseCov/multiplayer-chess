@@ -44,6 +44,10 @@ class Piece < ApplicationRecord
     valid_moves
   end
 
+  def attack_moveset
+    moveset
+  end
+
   def report_line_of_sight
     @squares_to_block ||= []
     attack_moveset.each do |row_movement, col_movement, amount_to_check|
@@ -144,35 +148,5 @@ class Piece < ApplicationRecord
       end
     end
     valid
-  end
-
-  def dangerous_positions
-    danger = []
-    opposition = color ? game.white_pieces.untaken_pieces : game.color_pieces.untaken_pieces
-    opposition.includes(:square).where.not(type: 'King').each do |piece|
-      danger << piece.attack_moves
-    end
-    danger.flatten
-  end
-
-  def validate_square_king_version(row_direction, col_direction, amount_to_check)
-    @squares_involved = [square]
-    row_count = col_count = 0
-    amount_to_check.times do
-      row_count += row_direction
-      col_count += col_direction
-      square = game_squares.find_by(row: (current_row + row_count), column: (current_col + col_count))
-      break if square.nil? || square.piece&.color == color
-
-      if square.piece.nil?
-        @squares_involved << square
-      elsif square.piece.color == enemy
-        @squares_involved << square
-        break
-      end
-    end
-    return true if @squares_involved.flatten.any? { |s| s.piece&.type == 'King' && s.piece&.color == enemy }
-
-    false
   end
 end

@@ -1,6 +1,10 @@
 <h2 class="text-center font-bold text-2xl"><%=game.turn ? "Color's turn! (#{game.color_player.username})" : "White's turn! (#{game.white_player.username})" %></h2>
-<% if game.game_over %>
-  <h3 class="text-center font-bold text-4xl">Game over!! <%=game.winner.username%> wins!!!</h3>
+<% if game.game_over%>
+  <% if game.winner %>
+    <h3 class="text-center font-bold text-4xl">Game over!! <%=game.winner.username%> wins!!!</h3>
+  <% else %>
+    <h3 class="text-center font-bold text-4xl">Game Over! It's a stalemate!</h3>
+  <% end %>
 <%elsif game.check%>
   <h3 class="text-center font-bold text-4xl">Check!! You must get your king out of danger!</h3>
 <% end %>

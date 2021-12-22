@@ -8,7 +8,6 @@ class PiecesController < ApplicationController
   #=== Updating
   before_action :set_selected_square, :save_current_game_state,
                 only: %i[update_pawn update_king update_knight update_rook update_bishop update_queen]
-
   before_action :process_turn,
                 only: %i[update_knight update_rook update_bishop update_queen]
 
@@ -22,7 +21,7 @@ class PiecesController < ApplicationController
   end
 
   def update_king
-    if @piece.has_moved == true
+    if @piece.has_moved || @game.check
       process_turn
     elsif @square == @game.squares.find_by(row: @piece.square.row, column: (@piece.square.column + 2))
       castle(@game.pieces.where(type: 'Rook', color: @piece.color).first, 1) # Right
@@ -101,12 +100,12 @@ class PiecesController < ApplicationController
     @square.piece&.update_attribute(:taken, true)
     @square.piece = @piece
     @square.save
-    !validate_king_safety_after_move? # return true unless king is in danger
+    !validate_king_safety_after_move
   end
 
-  def validate_king_safety_after_move?
-    @king = @game.pieces.where(type: 'King', color: @piece.color).first
-    !!@king.king_is_in_sights # false if king safe, true if not safe
+  def validate_king_safety_after_move
+    @king = @game.current_team_live_pieces.king.first
+    @king.find_enemy_range.flatten.any? { |s| s&.piece == @king }
   end
 
   def proceed_with_turn
