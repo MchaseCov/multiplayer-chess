@@ -44,8 +44,15 @@ class Pawn < Piece
   end
 
   def promote(promotion)
-    options = %w[Queen Knight Rook Bishop]
-    choice = options[promotion] || 'Queen'
-    update(type: choice)
+    case promotion
+    when 2
+      Knight.create(color: color, game: game, square: square, user: user, has_moved: true)
+    when 3
+      Rook.create(color: color, game: game, square: square, user: user, has_moved: true)
+    when 4
+      Bishop.create(color: color, game: game, square: square, user: user, has_moved: true)
+    else
+      Queen.create(color: color, game: game, square: square, user: user, has_moved: true)
+    end
   end
 end

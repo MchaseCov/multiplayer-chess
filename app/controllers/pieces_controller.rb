@@ -150,6 +150,6 @@ class PiecesController < ApplicationController
 
   def promote_pawn
     option = params[:upgrade].to_i || 1
-    @piece.promote(option)
+    @piece = @piece.promote(option)
   end
 end
