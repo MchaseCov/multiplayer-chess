@@ -2,5 +2,7 @@
 <%=@game.color_player ? @game.color_player.username : "No second player yet" %>
 <%= turbo_stream_from @game %>
 <%= turbo_frame_tag id="chess_#{dom_id(@game)}", class:"w-full" do%>
-  <%= render @game%>
+  <%= cache @game do%>
+    <%= render @game%>
+  <% end %>
 <% end %>
