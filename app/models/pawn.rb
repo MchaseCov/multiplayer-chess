@@ -45,11 +45,11 @@ class Pawn < Piece
 
   def promote(promotion)
     case promotion
-    when 2
+    when 1
       Knight.create(color: color, game: game, square: square, user: user, has_moved: true)
-    when 3
+    when 2
       Rook.create(color: color, game: game, square: square, user: user, has_moved: true)
-    when 4
+    when 3
       Bishop.create(color: color, game: game, square: square, user: user, has_moved: true)
     else
       Queen.create(color: color, game: game, square: square, user: user, has_moved: true)

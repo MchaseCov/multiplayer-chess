@@ -106,6 +106,7 @@ class PiecesController < ApplicationController
   end
 
   def proceed_with_turn
+    @pawn&.destroy
     @piece.update_attribute(:has_moved, true)
     @game.squares.where(urgent: true).each(&:set_square_as_unurgent)
     update_turn
@@ -117,7 +118,8 @@ class PiecesController < ApplicationController
   end
 
   def rollback_turn
-    @piece.type = @piece_original_type
+    @piece = @pawn if @pawn
+    @upgraded_piece&.destroy
     @piece_original_square.piece = @piece
     @original_target.piece = @original_target_piece
     @piece_original_square.save
@@ -148,8 +150,10 @@ class PiecesController < ApplicationController
     redirect_to @game and return
   end
 
+  # Assigns "backup variables" in case of rollback
   def promote_pawn
-    option = params[:upgrade].to_i || 1
-    @piece = @piece.promote(option)
+    @pawn = @piece
+    @upgraded_piece = @piece.promote(params[:upgrade].to_i || 1)
+    @piece = @upgraded_piece
   end
 end
