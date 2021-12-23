@@ -25,7 +25,6 @@ class Game < ApplicationRecord
     create_pawns(true, 7, color_player)
     create_back_row(true, 8, color_player)
   end
-  # Scopes
   # Validations
   validates_length_of :squares, maximum: 64
 
@@ -76,16 +75,8 @@ class Game < ApplicationRecord
     turn ? color_pieces.untaken_pieces : white_pieces.untaken_pieces
   end
 
-  def opposing_team_live_pieces
-    turn ? white_pieces.untaken_pieces : color_pieces.untaken_pieces
-  end
-
   def current_player
     turn ? color_player : white_player
-  end
-
-  def opposing_player
-    turn ? white_player : color_player
   end
 
   def current_color
@@ -109,6 +100,18 @@ class Game < ApplicationRecord
       return true if piece.attack_moves.any?(&:urgent?)
     end
     false
+  end
+
+  def castle_square(king_square, direction)
+    squares.find_by(row: king_square.row, column: king_square.column + direction)
+  end
+
+  def right_rook(king)
+    full_team_of_piece(king).rook.first
+  end
+
+  def left_rook(king)
+    full_team_of_piece(king).rook.last
   end
 
   private

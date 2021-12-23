@@ -1,8 +1,4 @@
 class Queen < Piece
-  def valid_moves
-    collect_valid_moves(moveset)
-  end
-
   def moveset
     [[+1, +0, (8 - current_row)], # Y Upwards
      [-1, +0, (current_row - 1)], # Y Downwards

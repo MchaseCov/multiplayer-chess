@@ -9,10 +9,10 @@ class King < Piece
   # THEN adds castle moves if castle is possible
   # THEN filters out unsafe moves to return as the final collection
   def collect_valid_safe_king_moves
-    valid_moves = collect_valid_moves(moveset)
+    valid_moves = collect_valid_moves(moveset, &:possible_movements)
     return valid_moves if valid_moves.blank?
 
-    valid_moves += castle_moves if has_moved == false && !castle_moves.blank?
+    valid_moves += castle_moves if has_moved == false && !castle_moves.blank? && !game.check
 
     filter_unsafe_moves(valid_moves)
   end
@@ -25,11 +25,10 @@ class King < Piece
     return if left_rook.has_moved && right_rook.has_moved
 
     @castleable = []
-    @no_enemy = true
-    add_castle_option(collect_valid_moves([[0, -1, 3]]), 3, -2) if left_rook.has_moved == false
+    add_castle_option(collect_valid_moves([[0, -1, 3]], &:empty_squares), 3, -2) if left_rook.has_moved == false
     return @castleable unless right_rook.has_moved == false
 
-    add_castle_option(collect_valid_moves([[0, 1, 2]]), 2, 2)
+    add_castle_option(collect_valid_moves([[0, 1, 2]], &:empty_squares), 2, 2)
     @castleable
   end
 
@@ -50,7 +49,7 @@ class King < Piece
 
   # Escape check options (game-over verification)
   def escape_checkmate_moves
-    valid_moves = collect_valid_moves(moveset).flatten
+    valid_moves = collect_valid_moves(moveset, &:possible_movements).flatten
     valid_moves = remove_retaliatable_squares(valid_moves)
     valid_moves = remove_checking_piece_los_squares(valid_moves)
     valid_moves = remove_all_opponent_attack_options(valid_moves)
@@ -71,8 +70,7 @@ class King < Piece
   # Removes squares where enemy can make a capture move
   # Filters for: Move GUI && Game-over verification
   def remove_all_opponent_attack_options(valid_moves)
-    possible_attacking_moves_of_team(game.opposing_team_of_piece(self)).each do |position|
-      # all_current_attacking_moves_of_team(game.opposing_team_of_piece(self)).each do |position|
+    possible_attacking_moves_of_team(game.opposing_team_of_piece(self).includes(:square, :game)).each do |position|
       valid_moves.delete(position)
     end
     valid_moves
@@ -81,7 +79,7 @@ class King < Piece
   # If king is in check, they cannot escape by walking into the enemy's LoS
   # Filters for: Game-over verification
   def remove_checking_piece_los_squares(valid_moves)
-    game.squares.where(urgent: true).to_a.flatten.each do |position|
+    game_squares.where(urgent: true).to_a.flatten.each do |position|
       valid_moves.delete(position)
     end
     valid_moves
@@ -92,7 +90,7 @@ class King < Piece
   # Reports to: validate_king_safety_after_move in pieces_controller.rb
   def all_current_attacking_moves_of_team(team)
     all_valid_moves = []
-    team.includes(:square).each do |p|
+    team.includes(:square, :game).each do |p|
       all_valid_moves << p.attack_moves
     end
     all_valid_moves.flatten
@@ -102,10 +100,10 @@ class King < Piece
   # Reports to: remove_all_opponent_attack_options
   def possible_attacking_moves_of_team(team)
     dangerous_moves = []
-    team.includes(:square).each do |p|
-      dangerous_moves << p.report_line_of_sight_of_friendly_piece
+    team.each do |p|
+      dangerous_moves << p.collect_valid_moves(p.attack_moveset, &:squares_that_would_check)
     end
-    dangerous_moves.flatten
+    dangerous_moves.flatten.compact
   end
 
   # Collect squares that are valid for a king to move to & contain an enemy
@@ -122,8 +120,8 @@ class King < Piece
   # Reports to: remove_retaliatable_squares
   def find_squares_where_enemy_can_los(takeable_pieces)
     retaliating_enemies_lines_of_attack = []
-    game.opposing_team_of_piece(self).not_king.includes(:square).each do |p|
-      retaliating_enemies_lines_of_attack << p.report_line_of_sight_on_piece(takeable_pieces)
+    game.opposing_team_of_piece(self).not_king.includes(:square, :game).each do |p|
+      retaliating_enemies_lines_of_attack << p.collect_path_to(p.attack_moveset, takeable_pieces, &:friendly_squares)
     end
     retaliating_enemies_lines_of_attack.flatten.compact
   end
@@ -132,7 +130,7 @@ class King < Piece
   # King attack moves are the <= 8 squares immediately around the king, this is used for preventing 2
   # kings from walking into each other while not infinite looping between the two kings validation.
   def attack_moves
-    collect_valid_moves(moveset)
+    collect_valid_moves(moveset, &:possible_movements)
   end
 
   # Moveset for king. Format: [Y-direction, X direction, amount of squares the piece can move in that direction.]
@@ -147,12 +145,3 @@ class King < Piece
      [-1, -1, 1]] # To Down & Left
   end
 end
-
-# DEPRECATED BUT PRESERVED FOR TESTING
-# Removes squares where enemy has a los to king, but this should already be done by opponent attack options
-#  def remove_enemy_los_squares(valid_moves)
-#   find_squares_where_enemy_can_los(self).each do |position|
-#    valid_moves.delete(position)
-# end
-# valid_moves
-# end

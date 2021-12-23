@@ -23,10 +23,10 @@ class PiecesController < ApplicationController
   def update_king
     if @piece.has_moved || @game.check
       process_turn
-    elsif @square == @game.squares.find_by(row: @piece.square.row, column: (@piece.square.column + 2))
-      castle(@game.pieces.where(type: 'Rook', color: @piece.color).first, 1) # Right
-    elsif @square == @game.squares.find_by(row: @piece.square.row, column: @piece.square.column - 2)
-      castle(@game.pieces.where(type: 'Rook', color: @piece.color).last, -1) # Left
+    elsif @square == @game.castle_square(@piece.square, 2)
+      castle(@game.right_rook(@piece), 1)
+    elsif @square == @game.castle_square(@piece.square, -2)
+      castle(@game.left_rook(@piece), -1)
     else
       process_turn
     end
@@ -59,7 +59,7 @@ class PiecesController < ApplicationController
   def enforce_check(defender_color = @piece.color)
     king = @game.untaken_pieces.where(color: defender_color).king.first
 
-    return if @game.team_can_intercept_checkmate(@game.team_of_piece(king).not_king.includes(:square))
+    return if @game.team_can_intercept_checkmate(@game.team_of_piece(king).not_king.includes(:square, :game))
     return if king.escape_checkmate_moves
 
     @game.declare_player_as_winner(king.user == @game.white_player ? @game.color_player : @game.white_player)
@@ -127,8 +127,10 @@ class PiecesController < ApplicationController
   end
 
   def determine_if_check
-    squares_to_block = @piece.report_line_of_sight
-    if squares_to_block == true
+    line_of_sight_path = @piece.collect_path_to(@piece.attack_moveset, @game.opposing_team_of_piece(@piece).king,
+                                                @piece.square, &:possible_movements)
+    if line_of_sight_path.present?
+      line_of_sight_path.each(&:set_square_as_urgent)
       @game.update_attribute(:check, true)
       enforce_check(!@piece.color)
     elsif @game.check
@@ -136,17 +138,16 @@ class PiecesController < ApplicationController
     end
   end
 
-  #=======|IF KING IS CASTLE|=======
   def castle(rook, direction)
-    castle_square = Square.find(@piece.square.id + direction)
+    castle_square = @game.squares.find(@piece.square.id + direction)
     castle_square.piece = rook
     @square.piece = @piece
     rook.update_attribute(:has_moved, true)
     @piece.update_attribute(:has_moved, true)
+    @game.update_attribute(:turn, (@piece.color? ? false : true))
     redirect_to @game and return
   end
 
-  #======|IF PAWN IS PROMOTE|=======
   def promote_pawn
     option = params[:upgrade].to_i || 1
     @piece.promote(option)

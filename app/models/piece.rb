@@ -14,10 +14,18 @@
 # updated_at              :datetime     null: false
 #
 class Piece < ApplicationRecord
-  # Callbacks
-  # Scopes
-  scope :white_team, -> { where('color = :boolean', boolean: false).includes(:game) }
-  scope :color_team, -> { where('color = :boolean', boolean: true).includes(:game) }
+  # Associations
+  belongs_to :game
+  belongs_to :square, optional: true,
+                      inverse_of: :piece
+  belongs_to :user, optional: true,
+                    inverse_of: :pieces
+
+  #=======================================|PIECE METHODS|=======================================
+
+  #===========================================|SCOPES|==========================================
+  scope :white_team, -> { where('color = :boolean', boolean: false) }
+  scope :color_team, -> { where('color = :boolean', boolean: true) }
   scope :taken_pieces, -> { where('taken = :boolean', boolean: true) }
   scope :untaken_pieces, -> { where('taken = :boolean', boolean: false) }
   scope :pawn, -> { where('type = :type', type: 'Pawn') }
@@ -28,18 +36,10 @@ class Piece < ApplicationRecord
   scope :king, -> { where('type = :type', type: 'King') }
   scope :not_king, -> { where.not('type = :type', type: 'King') }
 
-  # Validations
-  # Associations
-  #===Games
-  belongs_to :game
-  #===Squares
-  belongs_to :square, optional: true,
-                      inverse_of: :piece
-  #===Users
-  belongs_to :user, optional: true,
-                    inverse_of: :pieces
-  # Methods
-  #===Cannot seem to Alias due to valid_moves belonging to respective subclasses
+  #=======================================|SIMPLE RETURNS|======================================
+  # Alias cannot be used due to STI
+  # Allows Pawn and King to specify a differing "attack style" than their normal moving style.
+  # All other pieces refer to this "alias"
   def attack_moves
     valid_moves
   end
@@ -48,74 +48,122 @@ class Piece < ApplicationRecord
     moveset
   end
 
-  def report_line_of_sight
-    @squares_to_block ||= []
-    attack_moveset.each do |row_movement, col_movement, amount_to_check|
-      los_lines = validate_square(row_movement, col_movement, amount_to_check, square)
-      @squares_to_block << los_lines if los_lines.flatten.any? do |s|
-                                          s.piece&.type == 'King' && s.piece&.color == !color
-                                        end
-    end
-    @squares_to_block.flatten.each(&:set_square_as_urgent)
-    @squares_to_block.present? ? true : false
+  def enemy_king_of_piece?(piece)
+    type == 'King' && color != piece.color
   end
 
-  #====RELATED TO FINDING PIECES THAT ARE UNSAFE FOR KING EVEN IF IT THINKS ITS SAFE WIP WIP WIP WIP
-  def report_line_of_sight_of_friendly_piece
-    @squares_that_are_actually_not_safe ||= []
-    attack_moveset.each do |row_movement, col_movement, amount_to_check|
-      stpcsaf = check_for_friendly(row_movement, col_movement, amount_to_check)
-      @squares_that_are_actually_not_safe << stpcsaf
-    end
-    @squares_that_are_actually_not_safe.flatten.compact
+  #=======================================|SQUARE GATHERING & VALIDATION|========================
+  # Finds moves to return as options to select on the GUI.
+  # NOTE: Pawn & King have unique "valid_moves", all other pieces refer to this.
+  def valid_moves
+    collect_valid_moves(moveset, &:possible_movements)
   end
 
-  def check_for_friendly(row_direction, col_direction, amount_to_check, inclusion = nil)
-    squares_that_piece_can_spot_a_friendly = [inclusion]
-    row_count = col_count = 0
-    amount_to_check.times do
-      row_count += row_direction
-      col_count += col_direction
-      square = game_squares.find_by(row: (current_row + row_count), column: (current_col + col_count))
-      break if square.nil?
-
-      if square.piece&.color == color
-        squares_that_piece_can_spot_a_friendly << square
-        break
-      elsif square.piece.nil?
-        squares_that_piece_can_spot_a_friendly << square
-      elsif square.piece.color == !color
-        break unless square.piece.type == 'King'
-      end
-    end
-    squares_that_piece_can_spot_a_friendly
-  end
-
-  def report_line_of_sight_on_piece(takeable_pieces)
-    line_of_sight_on_piece ||= []
-    attack_moveset.each do |row_movement, col_movement, amount_to_check|
-      los_lines = check_for_friendly(row_movement, col_movement, amount_to_check).flatten.compact
-      line_of_sight_on_piece << los_lines if los_lines.any? { |s| s.piece.in? takeable_pieces }
-    end
-    line_of_sight_on_piece.flatten.compact
-  end
-
-  def collect_valid_moves(moveset)
+  # Collects the squares involved for a piece to move from self to target piece(s).
+  # movesets          # 2D array of moves to check. Each piece has a moveset collection saved for general use.
+  # targets           # Array of pieces to filter against. Will save paths that have each piece in LoS.
+  # inclusion = nil   # Extra squares to include that would not be filtered, such as piece's starting square.
+  # &method_to_call   # Specify a block to declare what squares are valid. More info in BLOCK FILTERS section below.
+  def collect_path_to(movesets, targets, inclusion = nil, &method_to_call)
     validated_moves = []
-    moveset.each do |row_movement, col_movement, amount_to_check|
-      validated_moves += validate_square(row_movement, col_movement, amount_to_check)
+    movesets.each do |row_movement, col_movement, amount_to_check|
+      path_to_evaluate = evaluate_moveset(row_movement, col_movement, amount_to_check, method_to_call, inclusion)
+      validated_moves << path_to_evaluate if path_to_evaluate.any? { |s| s.piece.in? targets }
+    end
+    validated_moves.flatten.compact
+  end
+
+  # Collects all squares validated by &method_to_call. Does not track paths or relations between squares.
+  # Variables are the same as collect_path_to, but without a target to relate to.
+  def collect_valid_moves(movesets, inclusion = nil, &method_to_call)
+    validated_moves = []
+    movesets.each do |row_movement, col_movement, amount_to_check|
+      validated_moves += evaluate_moveset(row_movement, col_movement, amount_to_check, method_to_call, inclusion)
     end
     validated_moves.compact
   end
-  #============================================================================================
-  #===Instance Variables
 
   private
 
-  def enemy
-    @enemy = color ? false : true
+  # An "initialize" for each moveset, [i, i, i], passed by collect_valid_moves or collect_path_to.
+  # Grabs squares in the row and column direction of the respective first two numbers.
+  # Third number is amount of times to loop. BLOCK FILTERS break the loop early.
+  def evaluate_moveset(row_direction, col_direction, amount_to_check, method_to_call, inclusion = nil)
+    @valid = [inclusion]
+    @row_direction = row_direction
+    @col_direction = col_direction
+    @row_count = @col_count = 0
+    catch(:stop) do
+      amount_to_check.times do
+        validate_square_for_movement(method_to_call)
+      end
+    end
+    @valid.compact
   end
 
+  # Grabs the next appropriate square in the loop and plugs it into the user's chosen BLOCK FILTER
+  def validate_square_for_movement(method_to_call)
+    @row_count += @row_direction
+    @col_count += @col_direction
+    square_to_validate = game_squares.find_by(row: (current_row + @row_count), column: (current_col + @col_count))
+    method_to_call.call(self, square_to_validate)
+  end
+
+  #=======================================|BLOCK FILTERS|=======================================
+  # The following blocks are "options" to plug into the collect_path_to & collect_valid_moves methods.
+  # Allows specific filtering such as only taking squares that are empty or squares that aren't a friendly piece.
+  # Keeps the above methods DRY while allowing adjustments for specific scenarios!
+
+  # Collects only "Standard Moves".
+  # INCLUSIONS: empty, opponent
+  # EXCLUSIONS: ally
+  # BREAKS: invalid, ally, opponent
+  def possible_movements(square)
+    throw :stop if square.nil? || square.piece&.color == color
+
+    if square.piece.nil?
+      @valid << square
+    elsif square.piece.color == !color
+      @valid << square
+      throw :stop
+    end
+  end
+
+  # Collects only empty squares.
+  # INCLUSIONS: empty
+  # EXCLUSIONS: occupied
+  # BREAKS: invalid, occupied
+  def empty_squares(square)
+    if square.present? && square&.piece.nil?
+      @valid << square
+    else
+      throw :stop
+    end
+  end
+
+  # Collects only ally squares.
+  # INCLUSIONS: ally
+  # EXCLUSIONS: opponent, empty
+  # BREAKS: all (only once in any given direction)
+  def friendly_squares(square)
+    @valid << square if square&.piece&.color == color
+    throw :stop
+  end
+
+  # Collects "theoretical range" of a piece, for use in king protection
+  # Looks past the opposing king and includes allies to collect moves that are
+  # unsafe for the king to move to, even if they are "safe" at the present time
+  # INCLUSIONS: all until break
+  # EXCLUSIONS:
+  # BREAKS: invalid, occupied (unless occupying piece is opposing king)
+  def squares_that_would_check(square)
+    throw :stop if square.nil?
+    @valid << square
+    throw :stop if square.piece.present? && (square.piece&.color == !color && square.piece&.type != 'King')
+  end
+
+  #=======================================|INSTANCE VARIABLES|=======================================
+  # Neatly save instance variables for pieces to reuse without requery, tucked neatly away down here.
   def current_row
     @current_row ||= square.row.to_i
   end
@@ -126,28 +174,5 @@ class Piece < ApplicationRecord
 
   def game_squares
     @game_squares ||= game.squares
-  end
-
-  #===Moveset Methods
-
-  #======Validation
-
-  def validate_square(row_direction, col_direction, amount_to_check, inclusion = nil)
-    valid = [inclusion]
-    row_count = col_count = 0
-    amount_to_check.times do
-      row_count += row_direction
-      col_count += col_direction
-      square = game_squares.find_by(row: (current_row + row_count), column: (current_col + col_count))
-      break if square.nil? || square.piece&.color == color
-
-      if square.piece.nil?
-        valid << square unless @only_enemy
-      elsif square.piece.color == !color
-        valid << square unless @no_enemy
-        break
-      end
-    end
-    valid
   end
 end
