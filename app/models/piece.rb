@@ -13,6 +13,7 @@
 # created_at              :datetime     null: false
 # updated_at              :datetime     null: false
 #
+
 class Piece < ApplicationRecord
   # Associations
   belongs_to :game
@@ -141,22 +142,13 @@ class Piece < ApplicationRecord
     end
   end
 
-  # Collects only ally squares.
-  # INCLUSIONS: ally
-  # EXCLUSIONS: opponent, empty
-  # BREAKS: all (only once in any given direction)
-  def friendly_squares(square)
-    @valid << square if square&.piece&.color == color
-    throw :stop
-  end
-
   # Collects "theoretical range" of a piece, for use in king protection
   # Looks past the opposing king and includes allies to collect moves that are
   # unsafe for the king to move to, even if they are "safe" at the present time
   # INCLUSIONS: all until break
   # EXCLUSIONS:
   # BREAKS: invalid, occupied (unless occupying piece is opposing king)
-  def squares_that_would_check(square)
+  def look_past_king(square)
     throw :stop if square.nil?
     @valid << square
     throw :stop if square.piece.present? && (square.piece&.color == !color && square.piece&.type != 'King')
@@ -164,6 +156,7 @@ class Piece < ApplicationRecord
 
   #=======================================|INSTANCE VARIABLES|=======================================
   # Neatly save instance variables for pieces to reuse without requery, tucked neatly away down here.
+  # Should these be attr_accessors in their respective models?
   def current_row
     @current_row ||= square.row.to_i
   end
@@ -174,5 +167,50 @@ class Piece < ApplicationRecord
 
   def game_squares
     @game_squares ||= game.squares
+  end
+
+  #=======================================|MOVESETS|=======================================
+  # Movesets stored here are so they can be used by both their respective piece & for king safety checks.
+  # Alias methods with STI seem unstable, therefore each piece simply has a moveset method that refers
+  # to one or more of these options.
+  # Pawn.rb and King.rb contain specialized movesets as well
+
+  def straight_moveset
+    [[+1, +0, (8 - current_row)], # Y Upwards
+     [-1, +0, (current_row - 1)], # Y Downwards
+     [+0, +1, (8 - current_col)], # X Rightwards
+     [+0, -1, (current_col - 1)]] # X Leftwards
+  end
+
+  # To find if there is a Bishop or Queen looking at the King
+  def diagonal_moveset
+    [[+1, +1, (8 - current_col)], # To Up & Right
+     [-1, +1, (8 - current_col)], # To Down & Right
+     [+1, -1, (current_col - 1)], # To Up & Left
+     [-1, -1, (current_col - 1)]] # To Down & Left
+  end
+
+  # To find if any of the 8 surrounding knight-squares are a knight
+  def knight_moveset
+    [[+2, +1, 1],
+     [+1, +2, 1],
+     [-1, +2, 1],
+     [-2, +1, 1],
+     [-2, -1, 1],
+     [-2, -1, 1],
+     [-1, -2, 1],
+     [+1, -2, 1],
+     [+2, -1, 1]]
+  end
+
+  # To find if kings top or bottom diags contain a pawn (respective to direciton)
+  def pawn_attack_moveset
+    if color
+      [[-1, +1, 1], # To Down & Right
+       [-1, -1, 1]] # To Down & Left
+    else
+      [[+1, +1, 1], # To Up & Right
+       [+1, -1, 1]] # To Up & Left
+    end
   end
 end

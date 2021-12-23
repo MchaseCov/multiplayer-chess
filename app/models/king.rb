@@ -20,8 +20,8 @@ class King < Piece
   #=======================================|CHECKS IF CAN CASTLE|========================================
   # Assigns rooks. If rooks haven't moved && the squares between are clear, castle is offered as an option
   def castle_moves
-    right_rook = game.full_team_of_piece(self).rook.first
-    left_rook = game.full_team_of_piece(self).rook.last
+    right_rook = game.right_rook(self)
+    left_rook = game.left_rook(self)
     return if left_rook.has_moved && right_rook.has_moved
 
     @castleable = []
@@ -32,99 +32,98 @@ class King < Piece
     @castleable
   end
 
-  # Filters the between-tiles for obstacles, which is why {@castleable << "square.id - 3"} is not used instead
+  # Adds castle squares to the GUI options
   def add_castle_option(tiles, size, distance)
     @castleable << game_squares.find_by(row: current_row, column: (current_col + distance)) if tiles.size == (size)
   end
 
   #=======================================|VALIDATE SAFETY OF KING MOVEMENT|====================================
 
-  #========================================================================|COLLECTIONS: FILTER CHAINS TO DIRECTLY CALL|
-  # Move options (edit screen GUI)
-  # Removes squares where the enemy can see, or could retaliate if the square is currently an enemy
+  # FILTERED MOVES
+  # Removes options that are dangerous from king's valid moveset.
+  # If game is in check (meaning the king is in sights of an enemy), allows those pieces to "see through" the king
+  # to calculate their full potential moveset, hiding future moves the king is currently blocking behind itself.
   def filter_unsafe_moves(valid_moves)
-    valid_moves = remove_retaliatable_squares(valid_moves)
-    remove_all_opponent_attack_options(valid_moves)
-  end
-
-  # Escape check options (game-over verification)
-  def escape_checkmate_moves
-    valid_moves = collect_valid_moves(moveset, &:possible_movements).flatten
-    valid_moves = remove_retaliatable_squares(valid_moves)
-    valid_moves = remove_checking_piece_los_squares(valid_moves)
-    valid_moves = remove_all_opponent_attack_options(valid_moves)
-    valid_moves.present? ? true : false
+    valid_moves = remove_dangerous_moves(valid_moves)
+    valid_moves = remove_full_los_of_checker(valid_moves) if game.check == true
+    valid_moves
   end
 
   #========================================================================|FILTERS: REMOVE ANY UNSAFE SQUARES|
-  # If king is able to take a piece, makes sure that there is not a watching enemy that could retaliate
-  # Filters for: Move GUI && Game-over verification
-  def remove_retaliatable_squares(valid_moves)
-    takeable_pieces = find_pieces_under_king_attack(valid_moves)
-    find_squares_where_enemy_can_los(takeable_pieces).each do |position|
+
+  # Input: Valid moves within range of the king
+  # Output: Valid moves within range of the king, NOT in range of an enemy
+  def remove_dangerous_moves(valid_moves)
+    dangerous_moves = prepare_move_outcome_simulation(valid_moves)
+    dangerous_moves.each do |position|
       valid_moves.delete(position)
     end
     valid_moves
   end
 
-  # Removes squares where enemy can make a capture move
-  # Filters for: Move GUI && Game-over verification
-  def remove_all_opponent_attack_options(valid_moves)
-    possible_attacking_moves_of_team(game.opposing_team_of_piece(self).includes(:square, :game)).each do |position|
-      valid_moves.delete(position)
-    end
-    valid_moves
-  end
-
-  # If king is in check, they cannot escape by walking into the enemy's LoS
-  # Filters for: Game-over verification
-  def remove_checking_piece_los_squares(valid_moves)
-    game_squares.where(urgent: true).to_a.flatten.each do |position|
+  # Input: (DURING CHECK) Valid moves within range of the king, NOT in range of an enemy
+  # Output: Valid moves without allowing "self bodyblocking"
+  def remove_full_los_of_checker(valid_moves)
+    dangerous_moves = full_los_past_king(game.opposing_team_of_piece(self).includes(:square,
+                                                                                    :game).where(square: { urgent: true }))
+    dangerous_moves.each do |position|
       valid_moves.delete(position)
     end
     valid_moves
   end
 
   #========================================================================|COLLECTORS: PROVIDE SQUARES TO THE FILTERS|
-  # Collect all attacking moves a team can currently make
-  # Reports to: validate_king_safety_after_move in pieces_controller.rb
-  def all_current_attacking_moves_of_team(team)
-    all_valid_moves = []
-    team.includes(:square, :game).each do |p|
-      all_valid_moves << p.attack_moves
+
+  # Sets up the 1-8 possible moves for simulation to remove unsafe squares
+  def prepare_move_outcome_simulation(valid_moves)
+    @unsafe = []
+    original_square = square
+    valid_moves.each do |move|
+      validate_outcome_of_king_on_square(move)
     end
-    all_valid_moves.flatten
+    original_square.piece = self
+    @unsafe.flatten.compact
   end
 
-  # Collect all attacking moves a team could make INCLUDING friends
-  # Reports to: remove_all_opponent_attack_options
-  def possible_attacking_moves_of_team(team)
+  # Simulates a king on input square. If that king is checked, then mark the square as unsafe.
+  def validate_outcome_of_king_on_square(move)
+    original_piece = move.piece
+    move.piece = King.create(color: color, has_moved: has_moved, game: game, square: move)
+    @unsafe << move if move.piece.king_is_in_sights.present?
+    move.piece.destroy
+    move.piece = original_piece
+  end
+
+  # Simulate the king with the movesets of other piece types. If the king can directly line to it,
+  # then that square is unsafe for the king.
+  # Example using the first collect_path_to:
+  # If the king can spot a rook or queen in a straight line from the given position, then that means
+  # the rook or queen is threatening them.
+  def king_is_in_sights
+    enemy_team = game.opposing_team_of_piece(self)
+    danger_paths = []
+    danger_paths << collect_path_to(straight_moveset, enemy_team.rook.or(enemy_team.queen),
+                                    &:possible_movements)
+    danger_paths << collect_path_to(diagonal_moveset, enemy_team.bishop.or(enemy_team.queen),
+                                    &:possible_movements)
+    danger_paths << collect_path_to(knight_moveset, enemy_team.knight,
+                                    &:possible_movements)
+    danger_paths << collect_path_to(pawn_attack_moveset, enemy_team.pawn,
+                                    &:possible_movements)
+    danger_paths.flatten.compact
+  end
+
+  # Input: (DURING CHECK) Enemy pieces that are on a "urgent square", meaning they are causing check
+  # Output: Evaluates their moveset like normal EXCEPT ignoring the king. This allows pieces to "see past the king"
+  # and returns those squares to be filtered out
+  def full_los_past_king(pieces)
     dangerous_moves = []
-    team.each do |p|
-      dangerous_moves << p.collect_valid_moves(p.attack_moveset, &:squares_that_would_check)
+    pieces.each do |piece|
+      dangerous_moves << piece.collect_valid_moves(piece.attack_moveset, &:look_past_king)
     end
     dangerous_moves.flatten.compact
   end
 
-  # Collect squares that are valid for a king to move to & contain an enemy
-  # Reports to: remove_retaliatable_squares
-  def find_pieces_under_king_attack(valid_moves)
-    pieces_under_king_attack = []
-    valid_moves.each do |move|
-      pieces_under_king_attack << move if move.piece&.color == !color
-    end
-    pieces_under_king_attack
-  end
-
-  # Collects squares where opponent can retaliate against the king if the king makes a capture
-  # Reports to: remove_retaliatable_squares
-  def find_squares_where_enemy_can_los(takeable_pieces)
-    retaliating_enemies_lines_of_attack = []
-    game.opposing_team_of_piece(self).not_king.includes(:square, :game).each do |p|
-      retaliating_enemies_lines_of_attack << p.collect_path_to(p.attack_moveset, takeable_pieces, &:friendly_squares)
-    end
-    retaliating_enemies_lines_of_attack.flatten.compact
-  end
   #=======================================|MOVESET STORAGE METHODS|====================================
 
   # King attack moves are the <= 8 squares immediately around the king, this is used for preventing 2

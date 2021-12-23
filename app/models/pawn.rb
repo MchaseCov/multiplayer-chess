@@ -34,15 +34,11 @@ class Pawn < Piece
 
   # Team dependent moveset for diagonals
   def attack_moveset
-    if color
-      [[-1, +1, 1], # To Down & Right
-       [-1, -1, 1]] # To Down & Left
-    else
-      [[+1, +1, 1], # To Up & Right
-       [+1, -1, 1]] # To Up & Left
-    end
+    pawn_attack_moveset
   end
 
+  # If you change the type of the pawn itself, it won't actaully use the new moveset for check
+  # validation until the following player's turn. Instead, create a new piece to replace it!
   def promote(promotion)
     case promotion
     when 1
