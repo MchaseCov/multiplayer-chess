@@ -7,7 +7,10 @@ Rails.application.routes.draw do
   root 'games#index'
 
   resources :users, only: %i[index]
-  resources :games, only: %i[index show create]
+  resources :games, only: %i[index show create] do
+    post 'concede'
+    post 'request_draw'
+  end
   resources :pieces, only: %i[edit] do
     post 'pawn', to: 'pieces#update_pawn', as: 'update_pawn'
     post 'knight', to: 'pieces#update_knight', as: 'update_knight'

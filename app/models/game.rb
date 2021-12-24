@@ -9,6 +9,7 @@
 # turn                    :boolean                   default: false
 # check                   :boolean                   default: false
 # winner_id               :index        null: true, foreign key of 1 user
+# draw_requestor_id       :index        null: true, foreign key of 1 user
 # turn_count              :integer      counter_cache
 # created_at              :datetime     null: false
 # updated_at              :datetime     null: false
@@ -64,10 +65,28 @@ class Game < ApplicationRecord
                       foreign_key: :winner_id,
                       inverse_of: :won_games,
                       optional: true
+  belongs_to :draw_requestor, class_name: :User,
+                              foreign_key: :draw_requestor_id,
+                              inverse_of: :requested_drawn_games,
+                              optional: true
   # Methods
+
+  def concede(user)
+    update(game_over: true, winner: opposing_player_of_user(user))
+    touch
+  end
+
+  def opposing_player_of_user(user)
+    user == white_player ? color_player : white_player
+  end
 
   def declare_player_as_winner(player)
     update(game_over: true, winner: player)
+    touch
+  end
+
+  def request_draw_from(user)
+    update(draw_requestor: user)
     touch
   end
 

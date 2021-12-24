@@ -13,7 +13,13 @@
       <%if user_signed_in?%>
       /*Current user's DMs turn blue & align right side*/
       <%=".user-#{current_user.id}-piece"%>{pointer-events: auto;}
-        <% end %>
+      <%=".u-#{current_user.id}-button-box"%>
+        {display: flex;
+         flex-wrap: wrap;
+         justify-content: space-between;}
+      <%=".u-#{current_user.id}-buttons"%>
+          {display: block;}
+      <% end %>
     </style>
   </head>
   <body class="bg-slate-300">

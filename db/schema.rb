@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_24_005456) do
+ActiveRecord::Schema.define(version: 2021_12_24_020531) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,7 +25,9 @@ ActiveRecord::Schema.define(version: 2021_12_24_005456) do
     t.bigint "winner_id"
     t.boolean "check", default: false
     t.integer "turns_count"
+    t.bigint "draw_requestor_id"
     t.index ["color_player_id"], name: "index_games_on_color_player_id"
+    t.index ["draw_requestor_id"], name: "index_games_on_draw_requestor_id"
     t.index ["white_player_id"], name: "index_games_on_white_player_id"
     t.index ["winner_id"], name: "index_games_on_winner_id"
   end
@@ -89,6 +91,7 @@ ActiveRecord::Schema.define(version: 2021_12_24_005456) do
   end
 
   add_foreign_key "games", "users", column: "color_player_id"
+  add_foreign_key "games", "users", column: "draw_requestor_id"
   add_foreign_key "games", "users", column: "white_player_id"
   add_foreign_key "games", "users", column: "winner_id"
   add_foreign_key "pieces", "games"

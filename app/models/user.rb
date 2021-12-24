@@ -31,6 +31,9 @@ class User < ApplicationRecord
   has_many :won_games, class_name: :Game,
                        foreign_key: :winner_id,
                        inverse_of: :winner
+  has_many :requested_drawn_games, class_name: :Game,
+                                   foreign_key: :draw_requestor_id,
+                                   inverse_of: :draw_requestor
   #===Pieces
   has_many :pieces, inverse_of: :user
 
