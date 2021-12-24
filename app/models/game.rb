@@ -81,6 +81,14 @@ class Game < ApplicationRecord
 
   #=======================================|SCOPES|==========================================
   scope :recently_active, -> { where('updated_at > ?', Time.now - 30.minutes) }
+  scope :ended_game, -> { where('game_over = ?', true) }
+  scope :inactive, -> { where('updated_at > ?', Time.now - 3.hours) }
+
+  #=======================================|JOBS|==========================================
+  # (Paired with Heroku Scheduler)
+  def self.remove_inactive_games
+    Game.inactive.destroy_all
+  end
 
   #=======================================|ATTRIBUTES|=======================================
   # To update the status of the game
