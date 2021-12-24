@@ -110,6 +110,8 @@ class King < Piece
                                     &:possible_movements)
     danger_paths << collect_path_to(pawn_attack_moveset, enemy_team.pawn,
                                     &:possible_movements)
+    danger_paths << collect_path_to(moveset, enemy_team.king,
+                                    &:possible_movements)
     danger_paths.flatten.compact
   end
 
