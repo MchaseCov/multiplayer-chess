@@ -10,7 +10,7 @@
 # check                   :boolean                   default: false
 # winner_id               :index        null: true, foreign key of 1 user
 # draw_requestor_id       :index        null: true, foreign key of 1 user
-# turn_count              :integer      counter_cache
+# turns_count              :integer      counter_cache
 # created_at              :datetime     null: false
 # updated_at              :datetime     null: false
 #
@@ -141,10 +141,8 @@ class Game < ApplicationRecord
   private
 
   def create_game_squares
-    8.times do |r|
-      8.times do |c|
-        squares.create(column: c + 1, row: r + 1)
-      end
+    1.upto(8) do |r|
+      1.upto(8) { |c| squares.create(column: c, row: r) }
     end
   end
 

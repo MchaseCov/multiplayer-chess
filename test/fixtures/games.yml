@@ -3,11 +3,19 @@
 one:
   white_player: first_user
   color_player: second_user
+  game_over: false
+  turn: false
+  check: false
+  winner:
+  draw_requestor:
+  turns_count: 0
 
-two:
-  white_player: second_user
-  color_player: first_user
-
-no_players:
+check_game:
   white_player: first_user
-  color_player:
+  color_player: second_user
+  game_over: false
+  turn: false
+  check: true
+  winner:
+  draw_requestor:
+  turns_count: 0

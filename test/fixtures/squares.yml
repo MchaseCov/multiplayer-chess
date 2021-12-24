@@ -1,11 +1,45 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  row: 1
-  column: 1
+# STANDARD BOARD 
+<% @id = 0 
+ 1.upto(5) do |r|
+ 1.upto(5) do |c| %>
+square_<%=@id+=1%>:
+  row: <%=r%>
+  column: <%=c%>
+  urgent: false
   game: one
+<% end
+  end %>
 
-two:
-  row: 1
-  column: 1
-  game: two
+
+# 5 x 5 Test board
+# +---------+
+# |COLOR TM |
+# |R|B|Q|K|N|21-25
+# |P|P|P|P|P|16-20
+# |_|_|_|_|_|11-15
+# |P|P|P|P|P|6-10
+# |N|K|Q|B|R|1-5
+# |WHITE TM |
+# +---------+
+
+# CHECK GAME
+<%1.upto(3) do |r|
+  1.upto(3) do |c| %>
+square_<%=@id+=1%>:
+  row: <%=r%>
+  column: <%=c%>
+  urgent: true
+  game: check_game
+<% end
+  end %>
+
+# 3x3 check board
+# K IS WHITE, ELSE COLOR
+# +-----+
+# |R|_|B|
+# |_|_|_|
+# |K|_|Q|
+# +-----+
+# Technically topmid and midright shouldnt be urgent but doesnt matter here

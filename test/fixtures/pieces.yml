@@ -1,17 +1,167 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  type: 
+
+
+
+# WHITE TEAM LINEUP
+<%  1.upto(5) do |i| %>
+white_pawn_<%=i%>:
+  type: Pawn
   color: false
   taken: false
   has_moved: false
   game: one
-  square: one
+  user: first_user
+  square: square_<%=5+i%>
+  <%end %>
 
-two:
-  type: 
+white_rook:
+  type: Rook 
+  color: false
+  taken: false
+  has_moved: false
+  game: one
+  user: first_user
+  square: square_5
+
+white_knight:
+  type: Knight
+  color: false
+  taken: false
+  has_moved: false
+  game: one
+  user: first_user
+  square: square_1
+
+white_bishop:
+  type: Bishop
+  color: false
+  taken: false
+  has_moved: false
+  game: one
+  user: first_user
+  square: square_4
+
+white_queen:
+  type: Queen
+  color: false
+  taken: false
+  has_moved: false
+  game: one
+  user: first_user
+  square: square_3
+
+white_king:
+  type: King
+  color: false
+  taken: false
+  has_moved: false
+  game: one
+  user: first_user
+  square: square_2
+
+
+# COLOR TEAM LINEUP
+
+<%  1.upto(5) do |i| %>
+color_pawn_<%=i%>:
+  type: Pawn
   color: true
   taken: false
   has_moved: false
   game: one
-  square: two
+  user: second_user
+  square: square_<%=15+i%>
+<% end %>
+
+color_rook:
+  type: Rook 
+  color: true
+  taken: false
+  has_moved: false
+  game: one
+  user: second_user
+  square: square_21
+
+color_knight:
+  type: Knight
+  color: true
+  taken: false
+  has_moved: false
+  game: one
+  user: second_user
+  square: square_25
+
+color_bishop:
+  type: Bishop
+  color: true
+  taken: false
+  has_moved: false
+  game: one
+  user: second_user
+  square: square_22
+
+color_queen:
+  type: Queen
+  color: true
+  taken: false
+  has_moved: false
+  game: one
+  user: second_user
+  square: square_23
+
+color_king:
+  type: King
+  color: true
+  taken: false
+  has_moved: false
+  game: one
+  user: second_user
+  square: square_24
+
+######
+
+checking_rook:
+  type: Rook 
+  color: true
+  taken: false
+  has_moved: true
+  game: check_game
+  user: second_user
+  square: square_32
+
+checking_queen:
+  type: Queen
+  color: true
+  taken: false
+  has_moved: true
+  game: check_game
+  user: second_user
+  square: square_28
+
+checking_bishop:
+  type: Bishop
+  color: true
+  taken: false
+  has_moved: true
+  game: check_game
+  user: second_user
+  square: square_34
+
+checked_king:
+  type: King
+  color: false
+  taken: false
+  has_moved: true
+  game: check_game
+  user: first_user
+  square: square_26
+
+# id                      :bigint       null: false      primary key
+# type                    :string       STI              index
+# color                   :boolean                       indexed
+# taken                   :boolean      default: false   indexed
+# has_moved               :boolean      default: false
+# user_id                 :index                         foreign key of user
+# game_id                 :index        null:false,      foreign key of game
+# square_id               :index                         foreign key of square
