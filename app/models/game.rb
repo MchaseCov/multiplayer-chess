@@ -14,8 +14,8 @@
 #
 class Game < ApplicationRecord
   # Callbacks
-  after_update_commit do
-    broadcast_update_later_to self, target: "chess_game_#{id}" unless created_at >= (5.seconds.ago)
+  after_touch do
+    broadcast_update_later_to self, target: "chess_game_#{id}"
   end
 
   after_create_commit do
@@ -65,10 +65,12 @@ class Game < ApplicationRecord
 
   def declare_player_as_winner(player)
     update(game_over: true, winner: player)
+    touch
   end
 
   def declare_stalemate
     update(game_over: true, winner: nil)
+    touch
   end
 
   def current_team_live_pieces

@@ -121,6 +121,7 @@ class PiecesController < ApplicationController
   def update_turn
     determine_if_check
     @game.update_attribute(:turn, (@piece.color? ? false : true))
+    @game.touch
   end
 
   def rollback_turn
@@ -155,7 +156,7 @@ class PiecesController < ApplicationController
     rook.update_attribute(:has_moved, true)
     @piece.update_attribute(:has_moved, true)
     @game.update_attribute(:turn, (@piece.color? ? false : true))
-    redirect_to @game and return
+    update turn
   end
 
   # Assigns "backup variables" in case of rollback
