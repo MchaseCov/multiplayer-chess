@@ -120,6 +120,8 @@ class PiecesController < ApplicationController
 
   def update_turn
     determine_if_check
+    @game.turns.create(start_piece: @piece, end_piece: @original_target_piece, start_square: @piece_original_square,
+                       end_square: @piece.square)
     @game.update_attribute(:turn, (@piece.color? ? false : true))
     @game.touch
   end
@@ -155,7 +157,6 @@ class PiecesController < ApplicationController
     @square.piece = @piece
     rook.update_attribute(:has_moved, true)
     @piece.update_attribute(:has_moved, true)
-    @game.update_attribute(:turn, (@piece.color? ? false : true))
     update_turn
   end
 

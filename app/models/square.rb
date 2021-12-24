@@ -27,6 +27,13 @@ class Square < ApplicationRecord
   has_one :piece, inverse_of: :square
   #===Games
   belongs_to :game, validate: true
+  #===Turns
+  has_many :started_turns, class_name: :Turn,
+                           foreign_key: :start_square_id,
+                           inverse_of: :start_square
+  has_many :ended_turns, class_name: :Turn,
+                         foreign_key: :end_piece_id,
+                         inverse_of: :end_square
   # Methods
   def coordinate
     "(#{column},#{row})"

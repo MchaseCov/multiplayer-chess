@@ -9,6 +9,7 @@
 # turn                    :boolean                   default: false
 # check                   :boolean                   default: false
 # winner_id               :index        null: true, foreign key of 1 user
+# turn_count              :integer      counter_cache
 # created_at              :datetime     null: false
 # updated_at              :datetime     null: false
 #
@@ -49,6 +50,8 @@ class Game < ApplicationRecord
            dependent: :destroy
   #===Squares
   has_many :squares, -> { includes(:piece) }, dependent: :destroy
+  #===Turns
+  has_many :turns, -> { includes(:start_piece, :end_piece, :start_square, :end_square) }, dependent: :destroy
   #===Users
   belongs_to :white_player, class_name: :User,
                             foreign_key: :white_player_id,

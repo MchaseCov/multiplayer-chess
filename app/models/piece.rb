@@ -22,6 +22,12 @@ class Piece < ApplicationRecord
   belongs_to :user, optional: true,
                     inverse_of: :pieces
 
+  has_many :moved_turns, class_name: :Turn,
+                         foreign_key: :start_square_id,
+                         inverse_of: :start_piece
+  has_one :captured_turn, class_name: :Turn,
+                          foreign_key: :end_piece_id,
+                          inverse_of: :end_piece
   #=======================================|PIECE METHODS|=======================================
 
   #===========================================|SCOPES|==========================================

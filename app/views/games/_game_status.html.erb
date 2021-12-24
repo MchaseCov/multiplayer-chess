@@ -5,13 +5,26 @@
   </div>
   <% if game.game_over%>
     <% if game.winner %>
-      <h3 class="text-center font-bold text-4xl">Game over!! <%=game.winner.username%> wins!!!</h3>
+      <h3 class="text-center font-bold text-4xl bg-slate-500 mb-2 mx-5 rounded-xl">Game over!! <br>
+        <%=game.winner.username%> wins!</h3>
     <% else %>
-      <h3 class="text-center font-bold text-4xl">Game Over! It's a stalemate!</h3>
+      <h3 class="text-center font-bold text-4xl">Game Over!<br>
+        It's a stalemate!</h3>
     <% end %>
   <%elsif game.check%>
     <div class="bg-red-600">
       <h3 class="text-center font-bold text-2xl rounded"><%=game.turn ? "Black" : "White" %> King is in check!</h3>
     </div>
   <% end %>
-</aside>
+  <h3 class=text-center>Turns: <%=game.turns_count%></h3>
+  <div class="px-1 gap-1 grid grid-cols-3 max-h-96 overflow-y-scroll">
+    <%game.turns.each do |turn|%>
+      <div class="bg-slate-500 py-1">
+        <i class="fas fa-chess-<%=turn.start_piece.type.downcase%> pl-1 text-2xl <%=turn.start_piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
+        <%=turn.start_square.visual_coordinate%> <i class="fas fa-arrow-right"></i> <%=turn.end_square.visual_coordinate%>
+        <% if turn.end_piece %>
+          <i class="fas fa-chess-<%=turn.end_piece.type.downcase%> text-2xl <%=turn.end_piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
+        <% end %>
+      </div>
+    <% end %>
+  </aside>
