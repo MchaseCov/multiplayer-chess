@@ -15,6 +15,8 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
   # Callbacks
   # Scopes
+  scope :recently_online, -> { where('updated_at > ?', Time.now - 30.minutes) }
+
   # Validations
   validates_presence_of :username
   validates_uniqueness_of :username

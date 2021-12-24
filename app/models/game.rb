@@ -79,6 +79,9 @@ class Game < ApplicationRecord
 
   #=======================================|GAME METHODS|=====================================
 
+  #=======================================|SCOPES|==========================================
+  scope :recently_active, -> { where('updated_at > ?', Time.now - 30.minutes) }
+
   #=======================================|ATTRIBUTES|=======================================
   # To update the status of the game
 

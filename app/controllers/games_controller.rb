@@ -2,7 +2,7 @@ class GamesController < ApplicationController
   before_action :authenticate_user!, only: %i[create concede request_draw]
   before_action :authorize_game_participant, only: %i[concede request_draw]
   def index
-    @games = Game.all
+    @games = Game.recently_active
   end
 
   def show
