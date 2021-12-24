@@ -112,7 +112,7 @@ class PiecesController < ApplicationController
   end
 
   def proceed_with_turn
-    @pawn&.destroy
+    @pawn&.update(square_id: nil, taken: true)
     @piece.update_attribute(:has_moved, true)
     @game.squares.where(urgent: true).each(&:set_square_as_unurgent)
     update_turn

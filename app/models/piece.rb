@@ -19,13 +19,25 @@ class Piece < ApplicationRecord
   belongs_to :game
   belongs_to :square, optional: true,
                       inverse_of: :piece
-  belongs_to :user, optional: true,
-                    inverse_of: :pieces
 
-  has_many :moved_turns, class_name: :Turn,
+  belongs_to :user, inverse_of: :pieces
+  belongs_to :white_user,
+             class_name: :User,
+             foreign_key: :user_id,
+             optional: true,
+             inverse_of: :white_pieces
+  belongs_to :color_user,
+             class_name: :User,
+             foreign_key: :user_id,
+             optional: true,
+             inverse_of: :color_pieces
+
+  has_many :moved_turns, through: :game,
+                         source: :turns,
                          foreign_key: :start_square_id,
                          inverse_of: :start_piece
-  has_one :captured_turn, class_name: :Turn,
+  has_one :captured_turn, through: :game,
+                          source: :turns,
                           foreign_key: :end_piece_id,
                           inverse_of: :end_piece
   #=======================================|PIECE METHODS|=======================================

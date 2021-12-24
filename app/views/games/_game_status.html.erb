@@ -18,7 +18,7 @@
   <% end %>
   <h3 class=text-center>Turns: <%=game.turns_count%></h3>
   <div class="px-1 gap-1 grid grid-cols-3 max-h-96 overflow-y-scroll">
-    <%game.turns.each do |turn|%>
+    <%game.turns.includes(:start_piece, :end_piece, :start_square, :end_square).each do |turn|%>
       <div class="bg-slate-500 py-1">
         <i class="fas fa-chess-<%=turn.start_piece.type.downcase%> pl-1 text-2xl <%=turn.start_piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
         <%=turn.start_square.visual_coordinate%> <i class="fas fa-arrow-right"></i> <%=turn.end_square.visual_coordinate%>
@@ -28,13 +28,15 @@
       </div>
     <% end %>
   </div>
-  <div class="my-3 text-center hidden <%="u-#{game.white_player.id}-buttons"%> <%="u-#{game.color_player.id}-button-box"%> min-w-full">
-    <%= button_to "Concede Game", game_concede_path(game), class:"bg-rose-700 hover:bg-rose-400 text-slate-100 font-bold py-2 px-4 rounded-full min-w-full mb-2 " %>
-    <% if !game.draw_requestor %>
-      <%= button_to "Request a draw", game_request_draw_path(game), class:"bg-orange-700 hover:bg-orange-400 text-slate-100 font-bold py-2 px-4 rounded-full min-w-full mb-2"%>
-    <% else %>
-      <%= button_to "Accept draw request", game_request_draw_path(game), class:"bg-orange-700 hover:bg-orange-400 text-slate-100 font-bold py-2 rounded-full hidden u-#{game.opposing_player_of_user(game.draw_requestor).id}-buttons min-w-full mb-2" %>
-      <%= button_to "Draw request sent", "#", class:"bg-orange-700 hover:bg-orange-400 text-slate-100 font-bold py-2 rounded-full  hidden u-#{game.draw_requestor.id}-buttons min-w-full mb-2", disabled: true, method: :get %>
-    <% end %>
-  </div>
+  <% unless game.game_over %>
+    <div class="my-3 text-center hidden <%="u-#{game.white_player.id}-buttons"%> <%="u-#{game.color_player.id}-button-box"%> min-w-full">
+      <%= button_to "Concede Game", game_concede_path(game), class:"bg-rose-700 hover:bg-rose-400 text-slate-100 font-bold py-2 px-4 rounded-full min-w-full mb-2 " %>
+      <% if !game.draw_requestor %>
+        <%= button_to "Request a draw", game_request_draw_path(game), class:"bg-orange-700 hover:bg-orange-400 text-slate-100 font-bold py-2 px-4 rounded-full min-w-full mb-2"%>
+      <% else %>
+        <%= button_to "Accept draw request", game_request_draw_path(game), class:"bg-orange-700 hover:bg-orange-400 text-slate-100 font-bold py-2 rounded-full hidden u-#{game.opposing_player_of_user(game.draw_requestor).id}-buttons min-w-full mb-2" %>
+        <%= button_to "Draw request sent", "#", class:"bg-orange-700 hover:bg-orange-400 text-slate-100 font-bold py-2 rounded-full  hidden u-#{game.draw_requestor.id}-buttons min-w-full mb-2", disabled: true, method: :get %>
+      <% end %>
+    </div>
+  <% end %>
 </aside>

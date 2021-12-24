@@ -31,6 +31,24 @@ class Game < ApplicationRecord
   validates_length_of :squares, maximum: 64
 
   # Associations
+  #===Users
+  belongs_to :white_player, class_name: :User,
+                            foreign_key: :white_player_id,
+                            inverse_of: :white_games
+  belongs_to :color_player, class_name: :User,
+                            foreign_key: :color_player_id,
+                            inverse_of: :color_games
+
+  belongs_to :winner, class_name: :User,
+                      foreign_key: :winner_id,
+                      inverse_of: :won_games,
+                      optional: true
+  belongs_to :draw_requestor, class_name: :User,
+                              foreign_key: :draw_requestor_id,
+                              inverse_of: :requested_drawn_games,
+                              optional: true
+  #===Turns
+  has_many :turns, dependent: :destroy
   #===Pieces
   has_many :pieces, dependent: :destroy
   has_many :white_pieces, -> { merge(Piece.white_team) },
@@ -51,24 +69,6 @@ class Game < ApplicationRecord
            dependent: :destroy
   #===Squares
   has_many :squares, -> { includes(:piece) }, dependent: :destroy
-  #===Turns
-  has_many :turns, -> { includes(:start_piece, :end_piece, :start_square, :end_square) }, dependent: :destroy
-  #===Users
-  belongs_to :white_player, class_name: :User,
-                            foreign_key: :white_player_id,
-                            inverse_of: :white_games
-  belongs_to :color_player, class_name: :User,
-                            foreign_key: :color_player_id,
-                            inverse_of: :color_games
-
-  belongs_to :winner, class_name: :User,
-                      foreign_key: :winner_id,
-                      inverse_of: :won_games,
-                      optional: true
-  belongs_to :draw_requestor, class_name: :User,
-                              foreign_key: :draw_requestor_id,
-                              inverse_of: :requested_drawn_games,
-                              optional: true
   # Methods
 
   def concede(user)

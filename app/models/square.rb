@@ -23,15 +23,17 @@ class Square < ApplicationRecord
   }
 
   # Associations
-  #===Pieces
-  has_one :piece, inverse_of: :square
   #===Games
   belongs_to :game, validate: true
+  #===Pieces
+  has_one :piece, inverse_of: :square
   #===Turns
-  has_many :started_turns, class_name: :Turn,
+  has_many :started_turns, through: :game,
+                           source: :turns,
                            foreign_key: :start_square_id,
                            inverse_of: :start_square
-  has_many :ended_turns, class_name: :Turn,
+  has_many :ended_turns, through: :game,
+                         source: :turns,
                          foreign_key: :end_piece_id,
                          inverse_of: :end_square
   # Methods

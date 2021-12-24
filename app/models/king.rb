@@ -88,7 +88,7 @@ class King < Piece
   # Simulates a king on input square. If that king is checked, then mark the square as unsafe.
   def validate_outcome_of_king_on_square(move)
     original_piece = move.piece
-    move.piece = King.create(color: color, has_moved: has_moved, game: game, square: move)
+    move.piece = King.create!(user: user, color: color, has_moved: has_moved, game: game, square: move)
     @unsafe << move if move.piece.king_is_in_sights.present?
     move.piece.destroy
     move.piece = original_piece
