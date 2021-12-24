@@ -156,7 +156,7 @@ class PiecesController < ApplicationController
     rook.update_attribute(:has_moved, true)
     @piece.update_attribute(:has_moved, true)
     @game.update_attribute(:turn, (@piece.color? ? false : true))
-    update turn
+    update_turn
   end
 
   # Assigns "backup variables" in case of rollback
