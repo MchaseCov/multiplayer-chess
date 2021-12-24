@@ -1,0 +1,5 @@
+<div class="chat-message user-<%=message.author.id%>-message bg-slate-500 w-[90%] rounded-xl p-2 mx-1.5">
+  <%= message.author.username %>: (<%=time_ago_in_words(message.created_at)%> ago)
+  <br>
+  <p><%= message.body %></p>
+</div>

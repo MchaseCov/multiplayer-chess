@@ -45,7 +45,7 @@ class PiecesController < ApplicationController
   #=======|BEFORE ACTIONS : ALL|=======
   def set_game_and_piece
     @piece = current_user.pieces.find(params[:piece_id] || params[:id])
-    @game = @piece.game
+    @game = Game.find(params[:game_id])
   end
 
   def validate_ongoing_game
@@ -107,13 +107,12 @@ class PiecesController < ApplicationController
   end
 
   def king_safe?
-    king = @game.current_team_live_pieces.king.first
-    king.king_is_in_sights.blank?
+    @game.current_team_live_pieces.king.first.king_is_in_sights.blank?
   end
 
   def proceed_with_turn
     @pawn&.update(square_id: nil, taken: true)
-    @piece.update_attribute(:has_moved, true)
+    @piece.set_moved
     @game.squares.where(urgent: true).each(&:set_square_as_unurgent)
     update_turn
   end
@@ -155,8 +154,8 @@ class PiecesController < ApplicationController
     castle_square = @game.squares.find(@piece.square.id + direction)
     castle_square.piece = rook
     @square.piece = @piece
-    rook.update_attribute(:has_moved, true)
-    @piece.update_attribute(:has_moved, true)
+    rook.set_moved
+    @piece.set_moved
     update_turn
   end
 

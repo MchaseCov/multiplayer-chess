@@ -7,7 +7,7 @@
           <% if game.game_over %>
             <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
           <% else %>
-            <%= link_to edit_piece_path(square.piece), class:"pointer-events-none user-#{square.piece.user&.id}-piece" do %>
+            <%= link_to edit_game_piece_path(game, square.piece), class:"pointer-events-none user-#{square.piece.user&.id}-piece" do %>
               <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
             <% end %>
           <% end %>

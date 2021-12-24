@@ -1,6 +1,6 @@
 <div class="grid grid-cols-2 gap-y-2 z-50 relative">
   <%["Queen", "Knight", "Rook", "Bishop"].each_with_index do |option, index|%>
-    <%= button_to controller: "pieces", action: "update_pawn", piece_id: piece, square: square.id, upgrade: index, class:"mx-1" do %>
+    <%= button_to controller: "pieces", action: "update_pawn", game: piece.game, piece_id: piece, square: square.id, upgrade: index, class:"mx-1" do %>
       <i class="fas fa-chess-<%=option.downcase%>  text-4xl leading-4 <%=piece.color? ? "text-slate-100" : "text-slate-500 piece-border" %> hover:text-amber-400 hover:piece-border hover:text-5xl hover:leading-4"></i>
     <% end %>
   <% end %>

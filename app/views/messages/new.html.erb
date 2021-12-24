@@ -1,0 +1,10 @@
+<%= turbo_frame_tag id="new_message" do %>
+  <%= form_with model:[@game, @chat, @message],
+data: { controller: "reset-form", id: "new-message-form",
+action: "turbo:submit-end->reset-form#reset" } do |f| %>
+    <div class="text-center mt-1">
+      <%= f.text_area :body, class:"shadow appearance-none border rounded w-[90%] mx-auto  py-2 px-3 text-slate-700 leading-tight focus:outline-none focus:shadow-outline resize-none", placeholder:"Send A Message" %>
+      <%= f.submit "Send Message",  data: { disable_with: false }, class:"bg-rose-700 hover:bg-rose-400 text-slate-100 font-bold py-2 px-4 rounded-full min-w-full mb-2 " %>
+    </div>
+  <% end %>
+<% end %>
