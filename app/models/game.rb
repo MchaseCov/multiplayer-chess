@@ -1,4 +1,4 @@
-# == Table Schema ==
+#=======================================|GAME TABLE SCHEMA|=======================================
 #
 # table name: games
 #
@@ -15,7 +15,7 @@
 # updated_at              :datetime     null: false
 #
 class Game < ApplicationRecord
-  # Callbacks
+  #=======================================|GAME CALLBACKS|=======================================
   after_touch do
     broadcast_update_later_to self, target: "chess_game_#{id}"
   end
@@ -28,11 +28,11 @@ class Game < ApplicationRecord
     create_back_row(true, 8, color_player)
     create_chat
   end
-  # Validations
+  #=======================================|GAME VALIDATIONS|=======================================
   validates_length_of :squares, maximum: 64
 
-  # Associations
-  #===Users
+  #=======================================|GAME ASSOCIATIONS|=======================================
+  # ========|User related|======
   belongs_to :white_player, class_name: :User,
                             foreign_key: :white_player_id,
                             inverse_of: :white_games
@@ -48,9 +48,11 @@ class Game < ApplicationRecord
                               foreign_key: :draw_requestor_id,
                               inverse_of: :requested_drawn_games,
                               optional: true
-  #===Turns
+
+  # ========|Turn related|======
   has_many :turns, dependent: :destroy
-  #===Pieces
+
+  # ========|Piece related|======
   has_many :pieces, dependent: :destroy
   has_many :white_pieces, -> { merge(Piece.white_team) },
            class_name: :Piece,
@@ -68,61 +70,96 @@ class Game < ApplicationRecord
            class_name: :Piece,
            foreign_key: :game_id,
            dependent: :destroy
-  #===Squares
+  # ========|Square related|======
   has_many :squares, -> { includes(:piece) }, dependent: :destroy
-  #===Chats
+
+  # ========|Chat related|======
   has_one :chat, dependent: :destroy
   has_many :messages, through: :chat, class_name: :Message, source: :messages
-  # Methods
 
+  #=======================================|GAME METHODS|=====================================
+
+  #=======================================|ATTRIBUTES|=======================================
+  # To update the status of the game
+
+  # User concedes a game, other user is winner
   def concede(user)
     update(game_over: true, winner: opposing_player_of_user(user))
     touch
   end
 
-  def opposing_player_of_user(user)
-    user == white_player ? color_player : white_player
-  end
-
+  # User wins a game. Could be DRY'd with above, but I prefer the semantic difference
   def declare_player_as_winner(player)
     update(game_over: true, winner: player)
     touch
   end
 
+  # User requests a draw, other user can accept to set game as stalemate
   def request_draw_from(user)
     update(draw_requestor: user)
     touch
   end
 
+  # Game is over, no winner is set.
   def declare_stalemate
     update(game_over: true, winner: nil)
     touch
   end
 
+  # To find the opponent of a user
+  def opposing_player_of_user(user)
+    user == white_player ? color_player : white_player
+  end
+
+  #=======================================|FETCHES|=======================================
+  # To collect information about the game relative to an input
+
+  # The team in turn-dependent situations
   def current_team_live_pieces
     turn ? color_pieces.untaken_pieces : white_pieces.untaken_pieces
   end
 
+  # The team's user in turn-dependent situations
   def current_player
     turn ? color_player : white_player
   end
 
+  # The current team color in turn-dependent situations
   def current_color
     turn ? true : false
   end
 
-  def opposing_team_of_piece(piece)
-    piece.color ? white_pieces.untaken_pieces : color_pieces.untaken_pieces
-  end
-
+  # The current team relative to a piece
   def team_of_piece(piece)
     piece.color ? color_pieces.untaken_pieces : white_pieces.untaken_pieces
   end
 
+  # The current team relative to a piece, not discarding captured pieces
   def full_team_of_piece(piece)
     piece.color ? color_pieces : white_pieces
   end
 
+  # The opposing team relative to a piece
+  def opposing_team_of_piece(piece)
+    piece.color ? white_pieces.untaken_pieces : color_pieces.untaken_pieces
+  end
+
+  # The castle square of the board relative to a king and direction
+  def castle_square(king_square, direction)
+    squares.find_by(row: king_square.row, column: king_square.column + direction)
+  end
+
+  # Kingside rook relative to a specific king
+  def right_rook(king)
+    full_team_of_piece(king).rook.first
+  end
+
+  # Queenside rook relative to a specific king
+  def left_rook(king)
+    full_team_of_piece(king).rook.last
+  end
+
+  # Queries a team if check can be prevented from checkmate
   def team_can_intercept_checkmate(team)
     team.each do |piece|
       return true if piece.attack_moves.any?(&:urgent?)
@@ -130,27 +167,19 @@ class Game < ApplicationRecord
     false
   end
 
-  def castle_square(king_square, direction)
-    squares.find_by(row: king_square.row, column: king_square.column + direction)
-  end
-
-  def right_rook(king)
-    full_team_of_piece(king).rook.first
-  end
-
-  def left_rook(king)
-    full_team_of_piece(king).rook.last
-  end
-
   private
 
+  #===========================================|GAME CREATION|==========================================
+  # Sets up a new board of Chess!
+
+  # Tiles of the game, 8x8 from left to right, bottom to top. (Row, Column)
   def create_game_squares
     1.upto(8) do |r|
       1.upto(8) { |c| squares.create(column: c, row: r) }
     end
   end
 
-  def create_pawns(color, row, user) # STI cannot create through the square directly
+  def create_pawns(color, row, user)
     squares.where(row: row).each do |square|
       Pawn.create(color: color, game: square.game, square: square, user: user)
     end

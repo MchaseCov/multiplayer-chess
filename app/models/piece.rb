@@ -15,11 +15,14 @@
 #
 
 class Piece < ApplicationRecord
-  # Associations
+  #=======================================|PIECE ASSOCIATIONS|=======================================
+  # ========|Game related|======
   belongs_to :game
+  # ========|Square related|======
   belongs_to :square, optional: true,
                       inverse_of: :piece
 
+  # ========|User related|======
   belongs_to :user, inverse_of: :pieces
   belongs_to :white_user,
              class_name: :User,
@@ -32,6 +35,7 @@ class Piece < ApplicationRecord
              optional: true,
              inverse_of: :color_pieces
 
+  # ========|Turn related|======
   has_many :moved_turns, through: :game,
                          source: :turns,
                          foreign_key: :start_square_id,
@@ -69,6 +73,10 @@ class Piece < ApplicationRecord
 
   def enemy_king_of_piece?(piece)
     type == 'King' && color != piece.color
+  end
+
+  def set_moved
+    update_attribute(:has_moved, true)
   end
 
   #=======================================|SQUARE GATHERING & VALIDATION|========================
