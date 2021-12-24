@@ -44,7 +44,5 @@
     <% end %>
   </div>
   <h3 class=text-center>Chat with opponent and spectators:</h2>
-  <%= turbo_frame_tag id="game_(#{game.id})_chat", src:game_chat_path(game) do %>
-    <div class="h-80 bg-slate-900 rounded-xl">
-    <% end %>
-  </aside>
+  <%= turbo_frame_tag id="game_(#{game.id})_chat", src:game_chat_path(game) %>
+</aside>
