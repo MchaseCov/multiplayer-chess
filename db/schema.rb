@@ -10,10 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_12_24_020531) do
+ActiveRecord::Schema.define(version: 2021_12_24_180523) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "chats", force: :cascade do |t|
+    t.bigint "game_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["game_id"], name: "index_chats_on_game_id"
+  end
 
   create_table "games", force: :cascade do |t|
     t.bigint "white_player_id", null: false
@@ -30,6 +37,16 @@ ActiveRecord::Schema.define(version: 2021_12_24_020531) do
     t.index ["draw_requestor_id"], name: "index_games_on_draw_requestor_id"
     t.index ["white_player_id"], name: "index_games_on_white_player_id"
     t.index ["winner_id"], name: "index_games_on_winner_id"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "body"
+    t.bigint "author_id", null: false
+    t.bigint "chat_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["author_id"], name: "index_messages_on_author_id"
+    t.index ["chat_id"], name: "index_messages_on_chat_id"
   end
 
   create_table "pieces", force: :cascade do |t|
@@ -90,10 +107,13 @@ ActiveRecord::Schema.define(version: 2021_12_24_020531) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  add_foreign_key "chats", "games"
   add_foreign_key "games", "users", column: "color_player_id"
   add_foreign_key "games", "users", column: "draw_requestor_id"
   add_foreign_key "games", "users", column: "white_player_id"
   add_foreign_key "games", "users", column: "winner_id"
+  add_foreign_key "messages", "chats"
+  add_foreign_key "messages", "users", column: "author_id"
   add_foreign_key "pieces", "games"
   add_foreign_key "pieces", "squares"
   add_foreign_key "pieces", "users"

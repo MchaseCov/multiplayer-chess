@@ -26,6 +26,7 @@ class Game < ApplicationRecord
     create_back_row(false, 1, white_player)
     create_pawns(true, 7, color_player)
     create_back_row(true, 8, color_player)
+    create_chat
   end
   # Validations
   validates_length_of :squares, maximum: 64
@@ -69,6 +70,9 @@ class Game < ApplicationRecord
            dependent: :destroy
   #===Squares
   has_many :squares, -> { includes(:piece) }, dependent: :destroy
+  #===Chats
+  has_one :chat, dependent: :destroy
+  has_many :messages, through: :chat, class_name: :Message, source: :messages
   # Methods
 
   def concede(user)

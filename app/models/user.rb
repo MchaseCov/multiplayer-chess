@@ -51,7 +51,10 @@ class User < ApplicationRecord
                            source: :turns,
                            foreign_key: :start_square_id,
                            inverse_of: :start_square
-
+  #===Messages
+  has_many :authored_messages, class_name: :Message,
+                               foreign_key: :author_id,
+                               inverse_of: :author
   # Methods
   def email_required?
     false
