@@ -1,44 +1,41 @@
-<%= turbo_frame_tag id="chess_#{dom_id(@game)}", class:"w-full", target: '_top' do%>
-  <%= render "games/game_status", game: @game%>
-  <h2 class="text-center font-bold text-2xl"><%=@game.turn ? "Color's turn! (#{@game.color_player.username})" : "White's turn! (#{@game.white_player.username})" %></h2>
-  <div class="grid grid-cols-8 w-max gap-1 chess-board">
-    <%@game.squares.board_order.each do |square|%>
-      <% if @squares.include?(square) %>
-        <% if (@piece.type == "Pawn") && (square.row.in? [1,8]) %>
-          <div class="block border-2 border-slate-900 w-32 h-32 text-center relative <%=square.row.even? ? "even" : "odd"%> <%=square.urgent ? "urgent-option-overlay" : "option-overlay"%>" id="<%=square.coordinate%>">
-            <%=square.visual_coordinate%> <br>
-            <% if square.piece %>
-              <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl absolute z-10 inset-auto inset-x-0 <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
-            <% end %>
-            <%= render "pawn_form", piece: @piece, square: square%>
-          </div>
-        <% else %>
-          <div class="block border-2 border-slate-900 w-32 h-32 text-center <%=square.row.even? ? "even" : "odd"%>  <%=square.urgent ? "urgent-option-overlay" : "option-overlay"%>", id="<%=square.coordinate%>">
-            <%= button_to controller: "pieces", action: "update_#{@piece.type.downcase}", piece_id: @piece, square: square.id do %>
+  <%= turbo_frame_tag id="chess_#{dom_id(@game)}" do%>
+  <article class="flex center justify-center mx-auto gap-x-2">
+    <div class="grid grid-cols-8 min-w-max gap-1 chess-board self-center aspect-square">
+      <%@game.squares.board_order.each do |square|%>
+        <% if @squares.include?(square) %>
+          <% if (@piece.type == "Pawn") && (square.row.in? [1,8]) %>
+            <div class="block border-2 border-slate-900 w-32 h-32 text-center relative <%=square.row.even? ? "even" : "odd"%> <%=square.urgent ? "urgent-option-overlay" : "option-overlay"%>" id="<%=square.coordinate%>">
               <%=square.visual_coordinate%> <br>
-              <i class="fas fa-chess-<%=@piece.type.downcase%> text-6xl <%=@piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %> opacity-30"></i>
               <% if square.piece %>
-                <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
+                <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl absolute z-10 inset-auto inset-x-0 <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
               <% end %>
+              <%= render "pawn_form", piece: @piece, square: square%>
+            </div>
+          <% else %>
+            <div class="block border-2 border-slate-900 w-32 h-32 text-center <%=square.row.even? ? "even" : "odd"%>  <%=square.urgent ? "urgent-option-overlay" : "option-overlay"%>", id="<%=square.coordinate%>">
+              <%= button_to controller: "pieces", action: "update_#{@piece.type.downcase}", piece_id: @piece, square: square.id do %>
+                <%=square.visual_coordinate%> <br>
+                <i class="fas fa-chess-<%=@piece.type.downcase%> text-6xl <%=@piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %> opacity-30"></i>
+                <% if square.piece %>
+                  <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="border-2 border-slate-900 w-32 h-32 text-center  <%=square.row.even? ? "even" : "odd"%> <%=square.urgent ? "urgent-overlay" : "chess-square"%>" id="<%=square.coordinate%>">
+            <%=square.visual_coordinate%> <br>
+            <% if square.piece == @piece%>
+              <%= link_to @game do %>
+                <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl  text-amber-400 piece-border"></i>
+              <% end %>
+            <% elsif square.piece %>
+              <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
             <% end %>
           </div>
         <% end %>
-      <% else %>
-        <div class="border-2 border-slate-900 w-32 h-32 text-center  <%=square.row.even? ? "even" : "odd"%> <%=square.urgent ? "urgent-overlay" : "chess-square"%>" id="<%=square.coordinate%>">
-          <%=square.visual_coordinate%> <br>
-          <% if square.piece == @piece%>
-            <%= link_to @game do %>
-              <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl  text-amber-400 piece-border"></i>
-            <% end %>
-          <% elsif square.piece %>
-            <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
-          <% end %>
-        </div>
       <% end %>
-    <% end %>
-  </div>
-  Taken pieces:
-  <%@game.taken_pieces.each do |p|%>
-    <i class="fas fa-chess-<%=p.type.downcase%> text-6xl <%=p.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
-  <% end %>
+    </div>
+    <%= render "games/game_status", game: @game%>
+  </article>
 <% end %>

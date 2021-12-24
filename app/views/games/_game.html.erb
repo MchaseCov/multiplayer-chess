@@ -1,22 +1,19 @@
-<%= render "games/game_status", game: game%>
-<h2 class="text-center font-bold text-2xl"><%=game.turn ? "Color's turn! (#{game.color_player.username})" : "White's turn! (#{game.white_player.username})" %></h2>
-<div class="grid grid-cols-8 w-max gap-1 chess-board">
-  <%game.squares.includes(piece: :user).board_order.each do |square|%>
-    <div class="border-2 border-slate-900 w-32 h-32 text-center <%=square.row.even? ? "even" : "odd"%> <%=square.urgent ? "urgent-overlay" : ""%>" id="<%=square.coordinate%>">
-      <%=square.visual_coordinate%> <br>
-      <% if square.piece %>
-        <% if game.game_over %>
-          <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
-        <% else %>
-          <%= link_to edit_piece_path(square.piece), class:"pointer-events-none user-#{square.piece.user&.id}-piece" do %>
+<article class="flex center justify-center mx-auto gap-x-2">
+  <div class="grid grid-cols-8 min-w-max gap-1 chess-board self-center aspect-square">
+    <%game.squares.includes(piece: :user).board_order.each do |square|%>
+      <div class="border-2 border-slate-900 w-32 h-32 text-center <%=square.row.even? ? "even" : "odd"%> <%=square.urgent ? "urgent-overlay" : ""%>" id="<%=square.coordinate%>">
+        <%=square.visual_coordinate%> <br>
+        <% if square.piece %>
+          <% if game.game_over %>
             <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
+          <% else %>
+            <%= link_to edit_piece_path(square.piece), class:"pointer-events-none user-#{square.piece.user&.id}-piece" do %>
+              <i class="fas fa-chess-<%=square.piece.type.downcase%> text-6xl <%=square.piece.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
+            <% end %>
           <% end %>
         <% end %>
-      <% end %>
-    </div>
-  <% end %>
-</div>
-Taken pieces:
-<%game.taken_pieces.each do |p|%>
-  <i class="fas fa-chess-<%=p.type.downcase%> text-6xl <%=p.color? ? "text-neutral-900" : "text-slate-100 piece-border" %>"></i>
-<% end %>
+      </div>
+    <% end %>
+  </div>
+  <%= render "games/game_status", game: game%>
+</article>
