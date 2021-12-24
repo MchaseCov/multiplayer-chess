@@ -120,6 +120,8 @@ class Piece < ApplicationRecord
   # The following blocks are "options" to plug into the collect_path_to & collect_valid_moves methods.
   # Allows specific filtering such as only taking squares that are empty or squares that aren't a friendly piece.
   # Keeps the above methods DRY while allowing adjustments for specific scenarios!
+  # This could be in Square.rb but I find the benefits of setting the instance variables here outweigh the benefits of
+  # seperating out the methods into another class for organization
 
   # Collects only "Standard Moves".
   # INCLUSIONS: empty, opponent
@@ -198,15 +200,14 @@ class Piece < ApplicationRecord
 
   # To find if any of the 8 surrounding knight-squares are a knight
   def knight_moveset
-    [[+2, +1, 1],
-     [+1, +2, 1],
+    [[+1, +2, 1],
      [-1, +2, 1],
-     [-2, +1, 1],
-     [-2, -1, 1],
-     [-2, -1, 1],
-     [-1, -2, 1],
      [+1, -2, 1],
-     [+2, -1, 1]]
+     [-1, -2, 1],
+     [+2, +1, 1],
+     [-2, +1, 1],
+     [+2, -1, 1],
+     [-2, -1, 1]]
   end
 
   # To find if kings top or bottom diags contain a pawn (respective to direciton)
