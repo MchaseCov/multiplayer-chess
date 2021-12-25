@@ -1,10 +1,10 @@
 Rails.application.routes.draw do
   get 'pawnrails/console'
+  root 'games#index'
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Defines the root path route ("/")
-  root 'games#index'
 
   resources :users, only: %i[index]
   resources :games, only: %i[index show create] do
