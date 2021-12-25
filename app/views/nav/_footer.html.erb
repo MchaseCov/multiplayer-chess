@@ -1,0 +1,55 @@
+<footer class="text-base-content mt-auto bg-slate-200 pt-8 pb-6 mt-auto">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-wrap text-left lg:text-left">
+      <div class="w-full lg:w-6/12 px-4">
+        <h4 class="text-3xl fonat-semibold text-slate-708 font-josefin">Multiplayer Chess</h4>
+        <h5 class="text-lg mt-0 mb-2 text-slate-600">
+          Website by Chase Covington
+        </h5>
+      </div>
+      <div class="w-full lg:w-6/12 px-4">
+        <div class="flex flex-wrap items-top mb-6">
+          <div class="w-full lg:w-4/12 px-4 ml-auto">
+            <span class="block uppercase text-slate-500 text-sm font-josefin font-semibold mb-2">Site Navigation</span>
+            <ul class="list-unstyled">
+              <li>
+                <%= link_to "Home", root_path, class:"underline" %>
+              </li>
+              <% if user_signed_in? %>
+                <li>
+                  <%= link_to  "Edit User Settings", edit_user_registration_path, class:"underline", 'data-turbo-frame': "turbo-modal" %>
+                </li>
+                <li>
+                  <%= button_to  "Sign Out", destroy_user_session_path, class:"underline", method: :delete, :data => {turbo: "false"} %>
+                </li>
+              <% else %>
+                <li>
+                  <%= link_to  "Sign In", new_user_session_path, 'data-turbo-frame': "turbo-modal", class:"underline" %>
+                </li>
+                <li>
+                  <%= link_to  "Sign Up", new_user_registration_path, class:"underline", 'data-turbo-frame': "turbo-modal" %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+          <div class="w-full lg:w-4/12 px-4">
+            <span class="block uppercase text-slate-500 text-sm font-josefin font-semibold mb-2">Resources</span>
+            <ul class="list-unstyled">
+              <li>
+                <%= link_to  "Github Repo", 'https://github.com/MchaseCov/multiplayer-chess', class:"underline", target:"blank" %>
+              </li>
+              <li>
+                <%= mail_to 'mchasecov@gmail.com', "Email me!", target:'_blank' , class:"underline" %>
+              </li>
+              <li>
+                <%= link_to  "My LinkedIn", 'https://www.linkedin.com/in/chase-covington-784886228/', class:"underline", target:"blank" %>
+              </li>
+              <li>
+                <%= link_to "Chess Starter Guide", 'https://www.wikihow.com/Play-Chess-for-Beginners', class:"underline", target:"blank" %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>

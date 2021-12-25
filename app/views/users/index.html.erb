@@ -1,7 +1,27 @@
 <%= turbo_frame_tag id="user_list", target:"_top" do %>
-  <% @users.each do |user|%>
-    <%= button_to games_path(user: user) do %>
-      <%= user.username %>
-    <% end %>
-  <% end %>
+  <section>
+    <h1 class="text-center text-lg font-semibold font-josefin"> Click a user's name to start a game against them!</h1>
+    <table class="w-full">
+      <thead>
+        <tr class="text-xl font-bold text-left text-neutral-100 bg-slate-800 uppercase font-josefin">
+          <th class="px-4 py-3">Start game against: <br>
+            <p class="text-sm font-semibold">(Only showing recently active users)</p>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-slate-700">
+        <% @users.each do |user|%>
+          <tr class="text-white">
+            <td class="px-4 py-3 border">
+              <div class="flex items-center text-sm">
+                <%= button_to games_path(user: user) do %>
+                  <p class="font-semibold underline text-lg"><%=user.username%></p>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </section>
 <% end %>

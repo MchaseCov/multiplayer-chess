@@ -1,30 +1,41 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
-  <div class="field">
-    <%= f.label :username %><br />
-    <%= f.text_field :username, autofocus: true, autocomplete: "username" %>
-  </div>
-  <div class="field">
-    <%= f.label :password %> <i>(leave blank if you don't want to change it)</i><br />
-    <%= f.password_field :password, autocomplete: "new-password" %>
-    <% if @minimum_password_length %>
-      <br />
-      <em><%= @minimum_password_length %> characters minimum</em>
-    <% end %>
-  </div>
-  <div class="field">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-  </div>
-  <div class="field">
-    <%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i><br />
-    <%= f.password_field :current_password, autocomplete: "current-password" %>
-  </div>
-  <div class="actions">
-    <%= f.submit "Update" %>
-  </div>
+ <%= turbo_frame_tag id="turbo-modal",class:"w-full h-full" do %>
+  <section class="w-full h-full backdrop-brightness-50 pointer-events-auto backdrop-blur-md fadeIn">
+    <div class="bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg overflow-y-auto h-max px-5 py-1">
+      <div class="flex justify-end p-2">
+        <%= link_to '', data: { controller: "reset-form", action: "click->reset-form#reset", turbo_frame: "_top"} do %>
+          <i class="fas fa-times hover:bg-neutral-300 p-1 hover:rounded-lg"></i>
+        <% end %>
+      </div>
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+        <h3 class="text-xl font-medium text-gray-900">Edit user settings:</h3>
+        <div data-turbo="false">
+          <%= render "devise/shared/error_messages", resource: resource %>
+        </div>
+        <div class="field">
+          <%= f.label :username, class:"text-sm font-medium text-gray-900 block" %><br />
+          <%= f.text_field :username, autofocus: true, autocomplete: "username", class:"bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 block w-full p-2.5", placeholder:"username" %>
+        </div>
+        <div class="field">
+          <%= f.label :password, class:"text-sm font-medium text-gray-900 block" %><br />
+          <% if @minimum_password_length %>
+            <em>(<%= @minimum_password_length %> characters minimum)</em>
+          <% end %><br />
+          <i class="text-sm font-medium text-gray-900 block">(Leave blank to not edit)</i>
+          <%= f.password_field :password, autocomplete: "new-password", placeholder:"••••••••", class:"bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 block w-full p-2.5  mb-5" %>
+        </div>
+        <div class="field">
+          <%= f.label :password_confirmation, class:"text-sm font-medium text-gray-900 block" %><br />
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", placeholder:"••••••••", class:"bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 block w-full p-2.5  mb-5" %>
+        </div>
+        <div class="field">
+          <%= f.label :current_password, class:"text-sm font-medium text-gray-900 block" %> <i class="text-sm font-medium text-gray-900 block">(You must enter current password to confirm changes)</i><br />
+          <%= f.password_field :current_password, autocomplete: "new-password", placeholder:"••••••••", class:"bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-rose-500 focus:border-rose-500 block w-full p-2.5  mb-5" %>
+        </div>
+        <div class="actions my-3">
+          <%= f.submit "Update!", class:"w-full text-white bg-rose-700 hover:bg-rose-800 focus:ring-4" %>
+        </div>
+      <% end %>
+      <p><%= button_to "Delete my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class:"w-full text-white bg-rose-700 hover:bg-rose-800 focus:ring-4" %></p>
+    </div>
+  </section>
 <% end %>
-<h3>Cancel my account</h3>
-<p>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete %></p>
-<%= link_to "Back", :back %>

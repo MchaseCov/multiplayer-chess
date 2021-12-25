@@ -9,9 +9,9 @@
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
     <script src="https://kit.fontawesome.com/03edaf5be8.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600&family=Open+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
       <%if user_signed_in?%>
-      /*Current user's DMs turn blue & align right side*/
       <%=".user-#{current_user.id}-piece"%>{pointer-events: auto;}
       <%=".u-#{current_user.id}-button-box"%>
         {display: flex;
@@ -26,11 +26,15 @@
       <% end %>
     </style>
   </head>
-  <body class="bg-slate-300">
-    <p class="notice"><%= notice %></p>
-    <p class="alert"><%= alert %></p>
-    <main class="container mx-auto mt-8 flex center content-center justify-center">
+  <body class="bg-slate-300 font-open-sans flex flex-col h-screen justify-between">
+    <div class="text-center text-bold text-md absolute top-1 inset-x-0">
+      <p class="notice"><%= notice %></p>
+      <p class="alert"><%= alert %></p>
+    </div>
+    <main class="container mx-auto mt-8 flex center content-center justify-center mb-auto">
+      <%= turbo_frame_tag id="turbo-modal", target: '_top', class:"modal-overlay"%>
       <%= yield %>
     </main>
+    <%= render partial: "nav/footer" %>
   </body>
 </html>

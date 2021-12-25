@@ -1,37 +1,37 @@
 <aside class="bg-slate-700 text-slate-100 max-w-2xl break-all flex-wrap rounded">
   <div class="flex items-center p-5 mb-1 flex-wrap justify-center gap-x-2">
-    <h1 class="text-center p-1 mb-1"><strong class="p-1.5 rounded bg-white text-slate-900"><%=game.white_player.username%></strong> VS <strong class="p-1.5 rounded bg-slate-900"><%=game.color_player.username%></strong></h1>
+    <h1 class="text-center p-1 mb-1"><strong class="p-1.5 rounded bg-white text-slate-900 font-josefin"><%=game.white_player.username%></strong> VS <strong class="p-1.5 rounded bg-slate-900 font-josefin"><%=game.color_player.username%></strong></h1>
     <% if game.turn %>
-      <h2 class="font-bold text-2xl bg-slate-900 w-full rounded-3xl text-center"><%=game.color_player.username%>'s Turn (black)</h2>
+      <h2 class="font-bold text-2xl bg-slate-900 w-full rounded-3xl text-center font-josefin"><%=game.color_player.username%>'s Turn (black)</h2>
     <% else %>
-      <h2 class="font-bold text-2xl bg-white text-slate-900 w-full rounded-3xl text-center"><%=game.white_player.username%>'s Turn (white)</h2>
+      <h2 class="font-bold text-2xl bg-white text-slate-900 w-full rounded-3xl text-center font-josefin"><%=game.white_player.username%>'s Turn (white)</h2>
     <% end %>
   </div>
   <% unless game.game_over %>
     <div class="mt-3 text-center hidden <%="u-#{game.white_player.id}-buttons"%> <%="u-#{game.color_player.id}-button-box"%> min-w-full">
       <%= button_to "Concede Game", game_concede_path(game), class:"bg-rose-700 hover:bg-rose-400 text-slate-100 font-bold py-2 px-4 rounded-full min-w-full mb-2 " %>
       <% if !game.draw_requestor %>
-        <%= button_to "Request a draw", game_request_draw_path(game), class:"bg-custom-orange  text-slate-100 font-bold py-2 px-4 rounded-full min-w-full mb-2"%>
+        <%= button_to "Request a draw", game_request_draw_path(game), class:"bg-custom-orange text-slate-100 font-bold py-2 px-4 rounded-full min-w-full mb-2"%>
       <% else %>
-        <%= button_to "Accept draw request", game_request_draw_path(game), class:"bg-custom-orange  text-slate-100 font-bold py-2 rounded-full hidden u-#{game.opposing_player_of_user(game.draw_requestor).id}-buttons min-w-full mb-2" %>
-        <%= button_to "Draw request sent", "#", class:"bg-custom-orange  text-slate-100 font-bold py-2 rounded-full  hidden u-#{game.draw_requestor.id}-buttons min-w-full mb-2", disabled: true, method: :get %>
+        <%= button_to "Accept draw request", game_request_draw_path(game), class:"bg-custom-orange px-4  text-slate-100 font-bold py-2 rounded-full hidden u-#{game.opposing_player_of_user(game.draw_requestor).id}-buttons min-w-full mb-2" %>
+        <%= button_to "Draw request sent", "#", class:"bg-custom-orange  text-slate-100 font-bold py-2 px-4 rounded-full  hidden u-#{game.draw_requestor.id}-buttons min-w-full mb-2", disabled: true, method: :get %>
       <% end %>
     </div>
   <% end %>
   <% if game.game_over%>
     <% if game.winner %>
-      <h3 class="text-center font-bold text-4xl bg-slate-500 mb-2 mx-5 rounded-xl">Game over!! <br>
+      <h3 class="text-center font-bold text-4xl mb-2 mx-5 rounded-xl font-josefin">Game Over!! <br>
         <%=game.winner.username%> wins!</h3>
     <% else %>
-      <h3 class="text-center font-bold text-4xl">Game Over!<br>
+      <h3 class="text-center font-bold text-4xl font-josefin">Game Over!!<br>
         It's a draw!</h3>
     <% end %>
   <%elsif game.check%>
     <div class="bg-red-600">
-      <h3 class="text-center font-bold text-2xl rounded"><%=game.turn ? "Black" : "White" %> King is in check!</h3>
+      <h3 class="text-center font-bold text-2xl rounded font-josefin"><%=game.turn ? "Black" : "White" %> King is in check!</h3>
     </div>
   <% end %>
-  <h3 class=text-center>Turns: <%=game.turns_count%></h3>
+  <h3 class="text-center font-josefin">Turns: <%=game.turns_count%></h3>
   <div class="px-1 gap-1 grid grid-cols-3 h-80 max-h-80 overflow-y-scroll custom-scroll bg-slate-900 rounded-xl mb-4">
     <%game.turns.includes(:start_piece, :end_piece, :start_square, :end_square).each do |turn|%>
       <div class="bg-slate-500 py-1">
@@ -43,6 +43,6 @@
       </div>
     <% end %>
   </div>
-  <h3 class=text-center>Chat with opponent and spectators:</h2>
+  <h3 class="text-center font-josefin">Chat (Must be signed in to send a message):</h2>
   <%= turbo_frame_tag id="game_(#{game.id})_chat", src:game_chat_path(game) %>
 </aside>

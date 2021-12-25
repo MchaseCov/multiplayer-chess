@@ -1,0 +1,14 @@
+<tr class="text-white">
+  <td class="px-4 py-3 border">
+    <div class="flex items-center text-sm">
+      <%= link_to game_list do %>
+        <p class="font-semibold underline text-lg"><%=game_list.white_player.username.upcase_first%> VS <%=game_list.color_player.username.upcase_first%></p>
+      <% end %>
+    </div>
+  </td>
+  <td class="px-4 py-3 text-ms font-semibold border"><%=game_list.turns_count || 0%></td>
+  <td class="px-4 py-3 text-xs border">
+    <span class="px-2 py-1 font-semibold"> <%=game_list.status%> </span>
+  </td>
+  <td class="px-4 py-3 text-sm border"><%=time_ago_in_words(game_list.updated_at)%> ago</td>
+</tr>

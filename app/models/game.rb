@@ -125,6 +125,17 @@ class Game < ApplicationRecord
   #=======================================|FETCHES|=======================================
   # To collect information about the game relative to an input
 
+  # Get ongoing game status
+  def status
+    if !game_over
+      'Ongoing'
+    elsif game_over && winner.nil?
+      'Ended in draw'
+    else
+      "Won by #{winner.username}!"
+    end
+  end
+
   # The team in turn-dependent situations
   def current_team_live_pieces
     turn ? color_pieces.untaken_pieces : white_pieces.untaken_pieces

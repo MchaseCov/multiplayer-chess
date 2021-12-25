@@ -1,8 +1,17 @@
-Start a game: 
 <%= turbo_frame_tag id="user_list", src:users_path, target:"_top" %>
-list of all games:
-<div>
-  <%@games.each do |g|%>
-    <%= link_to "#{g.white_player.username}'s game", g %><br>
-  <% end %>
-</div>
+<section class="px-5">
+  <h1 class="text-center text-lg font-semibold font-josefin">Tune into an ongoing game as a spectator!</h1>
+  <table class="w-full">
+    <thead>
+      <tr class="text-xl font-bold text-left text-neutral-100 bg-slate-800 uppercase font-josefin">
+        <th class="px-4 py-3">Game:</th>
+        <th class="px-4 py-3">Turn Count:</th>
+        <th class="px-4 py-3">Status:</th>
+        <th class="px-4 py-3">Last Move:</th>
+      </tr>
+    </thead>
+    <tbody class="bg-slate-700">
+      <%= render partial: "game_list", collection: @games %>
+    </tbody>
+  </table>
+</section>
