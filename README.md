@@ -1,9 +1,13 @@
 
 # Multiplayer Chess
 
-  
 
 This project was done as a personal exploration to get some more practice with Active Record and model testing (minitest in this case) but with a more "traditional Ruby" feel!
+
+# Live Deployment On Heroku
+
+To view the project on Heroku, please visit:
+https://multiplayer-chess-mcc.herokuapp.com/
 
  ##  Summary Of Features
 
